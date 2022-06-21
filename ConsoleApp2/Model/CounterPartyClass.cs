@@ -11,7 +11,7 @@ namespace ConsoleApp2.Model
         public string Id { get; set; }
         public string Name { get; set; }
         public string PriceType { get; set; }
-        public List<OrderClass> orders { get; set; }
+        public List<OrderClass> counterPartyOrders { get; set; }
 
     }
 }
