@@ -10,7 +10,7 @@ namespace ConsoleApp2.Model
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public string PriceType { get; set; }
         public string Price { get; set; }
+        List<PriceTypeClass> PriceTypes { get; set; }
     }
 }

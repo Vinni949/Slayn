@@ -32,11 +32,11 @@ using ConsoleApp2.Model;
 ///получение списка товаров 
 ///</summary>
 
-//int offset = 0;
-//var query = new AssortmentApiParameterBuilder();
-//List<PositionClass> positions = new List<PositionClass>();
-//query.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/product/metadata/attributes/27fa75f7-3626-11ec-0a80-02a60003df33").Should().Be("true");
-////query.Parameter(p => p.Name).Should().Contains("Sheffilton");
+int offset = 0;
+var query = new AssortmentApiParameterBuilder();
+List<PositionClass> positions = new List<PositionClass>();
+query.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/product/metadata/attributes/27fa75f7-3626-11ec-0a80-02a60003df33").Should().Be("true");
+//query.Parameter(p => p.Name).Should().Contains("Sheffilton");
 //while (true)
 //{
 //    query.Offset(offset);
@@ -58,7 +58,7 @@ using ConsoleApp2.Model;
 //    offset += 1000;
 //    Console.WriteLine(offset);
 //}
-//Console.WriteLine("Готово");
+Console.WriteLine("Готово");
 
 
 //остатки по складам
@@ -74,7 +74,7 @@ using ConsoleApp2.Model;
 
 var queryCountr = new ApiParameterBuilder<CounterpartiesQuery>();
         queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/ffbdbe2e-3254-11ec-0a80-00f8000ad694").Should().Be("true");
-        int offset = 0;
+        offset = 0;
 while (true)
 {
     queryCountr.Offset(offset);
@@ -131,17 +131,20 @@ while (true)
                 order.positions = new List<PositionClass>();
                 for (int a = 0; a < orderProduct.Payload.Positions.Rows.Length; a++)
                 {
+                    string[] idCounterPartyOrders = orderProduct.Payload.Positions.Rows[a].Assortment.Meta.Href.Split("/");
                     PositionClass position = new PositionClass();
-                    position.Id = orderProduct.Payload.Positions.Rows[a].Id.ToString();
+                    position.Id = idCounterPartyOrders[idCounterPartyOrders.Length - 1].ToString();
                     position.Price =orderProduct.Payload.Positions.Rows[a].Price.ToString();
                     var queryPositionsOrder = new AssortmentApiParameterBuilder();
-                    queryPositionsOrder.Parameter(p => p.Id).Should().Be(Guid.Parse(position.Id));
+                    queryPositionsOrder.Parameter(p=>p.Id).Should().Be(Guid.Parse(position.Id));
+                    query.Parameter(p => p.Archived).Should().Be(true).Or.Be(false);
                     var orderPosition=await api.Assortment.GetAllAsync(queryPositionsOrder);
-                    position.Name = orderPosition.Payload.Rows[0].Name.ToString();
+                    position.Name = orderPosition.Payload.Rows[0].Name;
+                    Console.WriteLine(position.Name);
                     order.positions.Add(position);
                 }
             }
-            offset += 1000;
+              offset += 1000;
             
         }
     }
