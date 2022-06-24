@@ -1,11 +1,10 @@
 ﻿using Confiti.MoySklad.Remap.Api;
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Confiti.MoySklad.Remap.Client;
 using Confiti.MoySklad.Remap.Entities;
 using Confiti.MoySklad.Remap.Models;
 using ConsoleApp2.Model;
+using Microsoft.EntityFrameworkCore;
+
 
         //var api = GetApiCredentials();
         //List<PositionClass> positions = new List<PositionClass>();
@@ -59,10 +58,9 @@ while (true)
 
         //надо получить комплекты await api.Bundle.Equals();
 
-        if (response.Payload.Rows[i].Product.ToString() != "Confiti.MoySklad.Remap.Entities.Product")
+        if (response.Payload.Rows[i].Product.ToString() == "Confiti.MoySklad.Remap.Entities.Product")
         {
             var positionAssortment = await api.Product.GetAsync(Guid.Parse(response.Payload.Rows[i].Id.ToString()));
-            Console.WriteLine(position.Name);
 
             for (int a = 0; a < positionAssortment.Payload.SalePrices.Length; a++)
             {
@@ -72,6 +70,8 @@ while (true)
                 position.PriceTypes.Add(priceTypeClass);
             }
         }
+        else
+            Console.WriteLine(position.Id + "\t" + position.Name +"Не подгружен!!!"); 
         positions.Add(position);
         
     }
@@ -94,8 +94,8 @@ Console.WriteLine("Готово");
 ///</summary>
 
 var queryCountr = new ApiParameterBuilder<CounterpartiesQuery>();
-    queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/ffbdbe2e-3254-11ec-0a80-00f8000ad694").Should().NotBe("false");
-    //queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/c3905508-f2bf-11ec-0a80-06270018eda1").Should().NotBe(null);
+    queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/ffbdbe2e-3254-11ec-0a80-00f8000ad694").Should().NotBe("false"); //Выгрузка по рассылке остатков
+    //queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/c3905508-f2bf-11ec-0a80-06270018eda1").Should().NotBe(null); //Вышрузка по логину и паролю
 offset = 0;
 while (true)
 {
