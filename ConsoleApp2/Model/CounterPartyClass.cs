@@ -12,6 +12,8 @@ namespace ConsoleApp2.Model
         public string Name { get; set; }
         public string PriceType { get; set; }
         public List<OrderClass> counterPartyOrders { get; set; }
+        public string LoginOfAccessToTheLC { get; set; }
+        public string LoginOfPsswordToTheLC { get; set; }
 
     }
 }
