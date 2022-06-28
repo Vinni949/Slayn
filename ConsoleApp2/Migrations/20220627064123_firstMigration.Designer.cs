@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ConsoleApp2.Migrations
 {
     [DbContext(typeof(DBSlaynTest))]
-    [Migration("20220624113934_BDSlaynTest")]
-    partial class BDSlaynTest
+    [Migration("20220627064123_firstMigration")]
+    partial class firstMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

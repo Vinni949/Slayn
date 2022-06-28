@@ -4,7 +4,7 @@
 
 namespace ConsoleApp2.Migrations
 {
-    public partial class BDSlaynTest : Migration
+    public partial class firstMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

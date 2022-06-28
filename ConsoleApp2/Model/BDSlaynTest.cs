@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Design;
+
 
 namespace ConsoleApp2.Model
 {
@@ -15,7 +17,7 @@ namespace ConsoleApp2.Model
         public DbSet<PriceTypeClass> priceTypeClass { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Filename=BDSlaynTest.sqlite");
+            optionsBuilder.UseSqlServer(@"Server = (localdb)\mssqllocaldb;Database = BdSlaynTest; Trusted_Connection = True;");
         }
 
 
