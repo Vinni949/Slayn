@@ -14,6 +14,7 @@ namespace ConsoleApp2.Model
         public List<OrderClass> counterPartyOrders { get; set; }
         public string LoginOfAccessToTheLC { get; set; }
         public string LoginOfPsswordToTheLC { get; set; }
+        public string Meta { get; set; }
 
     }
 }

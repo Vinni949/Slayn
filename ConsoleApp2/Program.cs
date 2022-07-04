@@ -4,13 +4,47 @@ using Confiti.MoySklad.Remap.Entities;
 using Confiti.MoySklad.Remap.Models;
 using ConsoleApp2.Model;
 using Microsoft.EntityFrameworkCore;
-
-
-        //var api = GetApiCredentials();
-        //List<PositionClass> positions = new List<PositionClass>();
-        //GetPositionsAsync(api,positions);
+static class Program
+{
+    static async Task Main(string[] args)
+    {
+        var api = GetApiCredentials();
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
-       
+        List<PositionClass> positions = new List<PositionClass>();
+        //positions=await GetApiPositions(api, positions);
+        counterParties = await GetApiCounterparties(api, counterParties);
+        GetApiCounterpartiesOrders(api, counterParties);
+
+        using (var context = new DBSlaynTest())
+        {
+            //foreach(var order in context.orderClass)
+            //{
+            //    context.orderClass.Remove(order); 
+            //}
+
+            
+            context.counterPartyClass.AddRange(counterParties);
+            context.SaveChanges();
+        }
+
+            Console.WriteLine("OK!");
+        //using(var context= new DBSlaynTest())
+        //{
+        //    foreach (var price in context.priceTypeClass)
+        //    {
+        //        context.priceTypeClass.RemoveRange(price);
+                
+        //    }
+        //    Console.WriteLine(context.positionClass.Count());
+        //    foreach (var position in context.positionClass)
+        //    {
+        //        context.positionClass.RemoveRange(position);
+
+        //    }
+        //    context.SaveChanges();
+        //}
+    }
+
 
 
     ///<summary>
@@ -19,185 +53,173 @@ using Microsoft.EntityFrameworkCore;
     ///<returns>
     ///возвращает api-подключение
     ///</returns>
+    static MoySkladApi GetApiCredentials()
+    {
         var credentials = new MoySkladCredentials()
         {
-            AccessToken = "1e3ab41b942b4b8bdf28a6559385247af734aae5"
+            Username = "aldef@slayn",
+            Password = "12345678",
         };
         var httpClient = new HttpClient();
         var api = new MoySkladApi(credentials, httpClient);
-
-
-
-///<summary>
-///получение списка товаров 
-///</summary>
-
-int offset = 0;
-var query = new AssortmentApiParameterBuilder();
-List<PositionClass> positions = new List<PositionClass>();
-query.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/product/metadata/attributes/27fa75f7-3626-11ec-0a80-02a60003df33").Should().Be("true");
-//query.Parameter(p => p.Name).Should().Contains("Sheffilton");
-query.Expand().With(p => p.Product).And.With(p=>p.Product.SalePrices);
-//while (true)
-//{
-//    query.Offset(offset);
-//    var response = await api.Assortment.GetAllAsync(query);
-
-
-//    if (response.Payload.Rows.Length == 0)
-//    {
-//        break;
-//    }
-//    for (int i = 0; i < response.Payload.Rows.Length; i++)
-//    {
-
-//        PositionClass position = new PositionClass();
-//        position.PriceTypes = new List<PriceTypeClass>();
-//        position.Id = response.Payload.Rows[i].Id.ToString();
-//        position.Name = response.Payload.Rows[i].Name.ToString();
-
-//        //надо получить комплекты await api.Bundle.Equals();
-
-//        if (response.Payload.Rows[i].Product.ToString() == "Confiti.MoySklad.Remap.Entities.Product")
-//        {
-//            var positionAssortment = await api.Product.GetAsync(Guid.Parse(response.Payload.Rows[i].Id.ToString()));
-
-//            for (int a = 0; a < positionAssortment.Payload.SalePrices.Length; a++)
-//            {
-//                PriceTypeClass priceTypeClass = new PriceTypeClass();
-//                priceTypeClass.name = positionAssortment.Payload.SalePrices[a].PriceType.Name.ToString();
-//                priceTypeClass.price = Convert.ToDecimal(positionAssortment.Payload.SalePrices[a].Value / 100);
-//                position.PriceTypes.Add(priceTypeClass);
-//            }
-//        }
-//        else
-//            Console.WriteLine(position.Id + "\t" + position.Name + "Не подгружен!!!");
-//        positions.Add(position);
-
-//    }
-
-//    offset += 1000;
-//    Console.WriteLine(offset);
-//}
-//    using (var context = new DBSlaynTest())
-//    {
-//        context.positionClass.AddRange(positions);
-//        context.SaveChanges();
-//    }
-
-Console.WriteLine("Готово");
-
-
-//остатки по складам
-
-//var remains=await api.Store.GetAllAsync();
-
-
-
-
-///<summary>
-///Получение списка контрагентов
-///</summary>
-
-
-var queryCountr = new ApiParameterBuilder<CounterpartiesQuery>();
-    queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/ffbdbe2e-3254-11ec-0a80-00f8000ad694").Should().NotBe("false"); //Выгрузка по рассылке остатков
-    //queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/c3905508-f2bf-11ec-0a80-06270018eda1").Should().NotBe(null); //Вышрузка по логину и паролю
-offset = 0;
-while (true)
-{
-    queryCountr.Offset(offset);
-    var contrs = await api.Counterparty.GetAllAsync(queryCountr);
-    if (contrs.Payload.Rows.Length == 0)
-    {
-        break;
+        return api;
     }
-    for (int countrPartyCount = 0; countrPartyCount < contrs.Payload.Rows.Length; countrPartyCount++)
-    {
-        CounterPartyClass counterPartyClass = new CounterPartyClass();
-        counterPartyClass.Id = contrs.Payload.Rows[countrPartyCount].Id.ToString();
-        counterPartyClass.Name = contrs.Payload.Rows[countrPartyCount].Name.ToString();
-        if (contrs.Payload.Rows[countrPartyCount].PriceType != null && contrs.Payload.Rows[countrPartyCount].PriceType.Name != null)
-        { counterPartyClass.PriceType = contrs.Payload.Rows[countrPartyCount].PriceType.Name.ToString(); }
-        counterPartyClass.LoginOfPsswordToTheLC = contrs.Payload.Rows[countrPartyCount].Attributes[contrs.Payload.Rows[countrPartyCount].Attributes.Length - 1].Value.ToString();
-        counterPartyClass.LoginOfAccessToTheLC = contrs.Payload.Rows[countrPartyCount].Attributes[contrs.Payload.Rows[countrPartyCount].Attributes.Length - 2].Value.ToString();
-        counterPartyClass.counterPartyOrders = new List<OrderClass>();
-        counterParties.Add(counterPartyClass);
-        Console.WriteLine(counterParties[countrPartyCount].Name);
 
-
-        ///<summary>
-        ///получение списка заказов контрагента
-        ///</summary>
-
-
-        var queryOrders = new ApiParameterBuilder<CustomerOrdersQuery>();
-        offset = 0;
-        queryOrders.Parameter("agent").Should().Be(contrs.Payload.Rows[countrPartyCount].Meta.Href);
-        DateTime date = DateTime.Now.Subtract(new TimeSpan(182, 0, 0, 0));
-        queryOrders.Parameter("deliveryPlannedMoment").Should().BeGreaterThan(date.ToString("yyyy-MM-dd hh:mm:ss"));
-        //queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
+    ///<summary>
+    ///получение списка товаров 
+    ///</summary>
+    static async Task<List<PositionClass>> GetApiPositions(MoySkladApi api, List<PositionClass> positions)
+    { int offset = 0;
+        var query = new AssortmentApiParameterBuilder();
+        query.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/product/metadata/attributes/27fa75f7-3626-11ec-0a80-02a60003df33").Should().Be("true");
+        //query.Parameter(p => p.Name).Should().Contains("Sheffilton");
+        query.Expand().With(p => p.Product).And.With(p => p.Product.SalePrices);
+        
         while (true)
         {
-            queryOrders.Offset(offset);
-            var orders = await api.CustomerOrder.GetAllAsync(queryOrders);
-            if (orders.Payload.Rows.Length == 0)
+            query.Offset(offset);
+            var response = await api.Assortment.GetAllAsync(query);
+            if (response.Payload.Rows.Length == 0)
             {
                 break;
             }
-
-            for (int i = 0; i < orders.Payload.Rows.Length; i++)
+            for (int i = 0; i < response.Payload.Rows.Length; i++)
             {
-                var order = new OrderClass();
-                order.Id = orders.Payload.Rows[i].Id.ToString();
-                order.Name = orders.Payload.Rows[i].Name.ToString();
-                order.DateСreation = orders.Payload.Rows[i].DeliveryPlannedMoment.ToString();
-                counterPartyClass.counterPartyOrders.Add(order);
-                Console.WriteLine(counterParties[countrPartyCount].counterPartyOrders[i].Name);
-                var queryOrderPositions = new ApiParameterBuilder<CustomerOrderQuery>();
 
-                queryOrderPositions.Expand()
-                    .With(p => p.Positions);
-                var orderProduct = await api.CustomerOrder.GetAsync(Guid.Parse(order.Id), queryOrderPositions);
-                order.positions = new List<PositionClass>();
-                for (int a = 0; a < orderProduct.Payload.Positions.Rows.Length; a++)
+                PositionClass position = new PositionClass();
+                position.PriceTypes = new List<PriceTypeClass>();
+                position.Id = response.Payload.Rows[i].Id.ToString();
+                position.Name = response.Payload.Rows[i].Name.ToString();
+
+                //надо получить комплекты await api.Bundle.Equals();
+
+                if (response.Payload.Rows[i].Product.ToString() == "Confiti.MoySklad.Remap.Entities.Product")
                 {
-                    string[] idCounterPartyOrders = orderProduct.Payload.Positions.Rows[a].Assortment.Meta.Href.Split("/");
-                    PositionClass position = new PositionClass();
-                    position.Id = idCounterPartyOrders[idCounterPartyOrders.Length - 1].ToString();
-                    position.priceOldOrder = orderProduct.Payload.Positions.Rows[a].Price.ToString();
-                    var queryPositionsOrder = new AssortmentApiParameterBuilder();
-                    queryPositionsOrder.Parameter(p => p.Id).Should().Be(Guid.Parse(position.Id));
-                    query.Parameter(p => p.Archived).Should().Be(true).Or.Be(false);
-                    var orderPosition = await api.Assortment.GetAllAsync(queryPositionsOrder);
-                    if (orderPosition.Payload.Rows.Length > 0) position.Name = orderPosition.Payload.Rows[0].Name;
-                    Console.WriteLine(position.Name);
-                    order.positions.Add(position);
+                    var positionAssortment = await api.Product.GetAsync(Guid.Parse(response.Payload.Rows[i].Id.ToString()));
+
+                    for (int a = 0; a < positionAssortment.Payload.SalePrices.Length; a++)
+                    {
+                        PriceTypeClass priceTypeClass = new PriceTypeClass();
+                        priceTypeClass.name = positionAssortment.Payload.SalePrices[a].PriceType.Name.ToString();
+                        priceTypeClass.price = Convert.ToDecimal(positionAssortment.Payload.SalePrices[a].Value / 100);
+                        position.PriceTypes.Add(priceTypeClass);
+                        
+                    }
                 }
+                else
+                    Console.WriteLine(position.Id + "\t" + position.Name + "Не подгружен!!!");
+                positions.Add(position);
             }
             offset += 1000;
+            Console.WriteLine(offset);
+            
+        }
+        
+        
+        return positions;
+        Console.WriteLine("Готово");
+    }
 
+    //остатки по складам
+
+    //var remains=await api.Store.GetAllAsync();
+
+
+    ///<summary>
+    ///Получение списка контрагентов
+    ///</summary>
+    static async Task<List<CounterPartyClass>> GetApiCounterparties(MoySkladApi api, List<CounterPartyClass> counterParties)
+    {
+        var queryCountr = new ApiParameterBuilder<CounterpartiesQuery>();
+        queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/ffbdbe2e-3254-11ec-0a80-00f8000ad694").Should().NotBe("false"); //Выгрузка по рассылке остатков
+        //queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/c3905508-f2bf-11ec-0a80-06270018eda1").Should().NotBe(null); //Вышрузка по логину и паролю
+        int offset = 0;
+        while (true)
+        {
+            queryCountr.Offset(offset);
+            var contrs = await api.Counterparty.GetAllAsync(queryCountr);
+            if (contrs.Payload.Rows.Length == 0)
+            {
+                break;
+            }
+            for (int countrPartyCount = 0; countrPartyCount < contrs.Payload.Rows.Length; countrPartyCount++)
+            {
+                CounterPartyClass counterPartyClass = new CounterPartyClass();
+                counterPartyClass.Id = contrs.Payload.Rows[countrPartyCount].Id.ToString();
+                counterPartyClass.Name = contrs.Payload.Rows[countrPartyCount].Name.ToString();
+                if (contrs.Payload.Rows[countrPartyCount].PriceType != null && contrs.Payload.Rows[countrPartyCount].PriceType.Name != null)
+                { counterPartyClass.PriceType = contrs.Payload.Rows[countrPartyCount].PriceType.Name.ToString(); }
+                counterPartyClass.LoginOfPsswordToTheLC = contrs.Payload.Rows[countrPartyCount].Attributes[contrs.Payload.Rows[countrPartyCount].Attributes.Length - 1].Value.ToString();
+                counterPartyClass.LoginOfAccessToTheLC = contrs.Payload.Rows[countrPartyCount].Attributes[contrs.Payload.Rows[countrPartyCount].Attributes.Length - 2].Value.ToString();
+                counterPartyClass.counterPartyOrders = new List<OrderClass>();
+                counterPartyClass.Meta = contrs.Payload.Rows[countrPartyCount].Meta.Href;
+                counterParties.Add(counterPartyClass);
+                Console.WriteLine(counterParties[countrPartyCount].Name);
+            }
+            offset += 1000;
+        }
+        return counterParties;
+
+    }
+
+    ///<summary>
+    ///получение списка заказов контрагента
+    ///</summary>
+    static async void GetApiCounterpartiesOrders(MoySkladApi api, List<CounterPartyClass> counterParties)
+    {
+        
+        for (int conterPartiecCount = 0; conterPartiecCount < counterParties.Count; conterPartiecCount++)
+        {
+            int offset = 0;
+            var queryOrders = new ApiParameterBuilder<CustomerOrdersQuery>();
+            DateTime date = DateTime.Now.Subtract(new TimeSpan(182, 0, 0, 0));
+            queryOrders.Parameter("deliveryPlannedMoment").Should().BeGreaterThan(date.ToString("yyyy-MM-dd hh:mm:ss"));
+            queryOrders.Parameter("agent").Should().Be(counterParties[conterPartiecCount].Meta);
+            //queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
+            while (true)
+            {
+                queryOrders.Offset(offset);
+                var orders = await api.CustomerOrder.GetAllAsync(queryOrders);
+                if (orders.Payload.Rows.Length == 0)
+                {
+                    break;
+                }
+
+                for (int i = 0; i < orders.Payload.Rows.Length; i++)
+                {
+                    var order = new OrderClass();
+                    order.Id = orders.Payload.Rows[i].Id.ToString();
+                    order.Name = orders.Payload.Rows[i].Name.ToString();
+                    order.DateСreation = orders.Payload.Rows[i].DeliveryPlannedMoment.ToString();
+                    counterParties[conterPartiecCount].counterPartyOrders.Add(order);
+                    Console.WriteLine(counterParties[conterPartiecCount].counterPartyOrders[i].Name);
+
+                }
+                offset += 1000;
+
+            }
         }
     }
-    offset += 1000;
-}
-using (var context = new DBSlaynTest())
-{
-    context.counterPartyClass.AddRange(counterParties);
-    context.SaveChanges();
-}
 
-//var order = "6678550908";
-//var queryPositionsOrder = new AssortmentApiParameterBuilder();
-
-//queryPositionsOrder.Parameter(p => p.Name).Should().Be(order);
-//query.Parameter(p => p.Archived).Should().Be(true).Or.Be(false);
-//var orderPosition = await api.Assortment.GetAllAsync(queryPositionsOrder);
+    //using (var context = new DBSlaynTest())
+    //{
+    //    context.counterPartyClass.AddRange(counterParties);
+    //    context.SaveChanges();
+    //} 
 
 
 
+    //var order = "6678550908";
+    //var queryPositionsOrder = new AssortmentApiParameterBuilder();
 
-Console.WriteLine("OK!");
+    //queryPositionsOrder.Parameter(p => p.Name).Should().Be(order);
+    //query.Parameter(p => p.Archived).Should().Be(true).Or.Be(false);
+    //var orderPosition = await api.Assortment.GetAllAsync(queryPositionsOrder);
+
+
+
+
+    
 
 
    
@@ -219,4 +241,4 @@ Console.WriteLine("OK!");
     //queryOrdersTest.Parameter("A38384711");
     //var orderTestName = api.CustomerOrder.GetAsync(Guid.ParseExact(queryOrdersTest));
 
-
+}
