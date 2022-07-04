@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp2", "ConsoleApp2\ConsoleApp2.csproj", "{BAA4AC48-37C5-4E2E-90A4-084A26FFEEC8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp2", "ConsoleApp2\ConsoleApp2.csproj", "{BAA4AC48-37C5-4E2E-90A4-084A26FFEEC8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MVCSlayn", "MVCSlayn\MVCSlayn.csproj", "{D5705D8A-A812-467A-8B93-F732792D39B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{BAA4AC48-37C5-4E2E-90A4-084A26FFEEC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BAA4AC48-37C5-4E2E-90A4-084A26FFEEC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BAA4AC48-37C5-4E2E-90A4-084A26FFEEC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5705D8A-A812-467A-8B93-F732792D39B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5705D8A-A812-467A-8B93-F732792D39B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5705D8A-A812-467A-8B93-F732792D39B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5705D8A-A812-467A-8B93-F732792D39B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
