@@ -18,7 +18,7 @@ namespace MVCSlayn.Controllers
         {
             List<OrderClass> orders = new List<OrderClass>();
             orders = context.OrderClass.ToList();
-            return View();
+            return View(orders);
         }
 
         public IActionResult Privacy()

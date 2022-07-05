@@ -8,9 +8,9 @@ namespace MVCSlayn.Models
         {
 
         }
-        public DbSet<CounterPartuClassContext> OrderClass { get; set; }
-        public DbSet<CounterPartuClassContext> PriceType { get; set; }
-        public DbSet<CounterPartuClassContext> PositionClass { get; set; }
+        public DbSet<OrderClass> OrderClass { get; set; }
+        public DbSet<PriceTypeClass> PriceType { get; set; }
+        public DbSet<PositionClass> PositionClass { get; set; }
 
     }
 }
