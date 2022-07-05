@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MVCSlayn.Models;
 using System.Diagnostics;
+using Models1.Model;
 
 namespace MVCSlayn.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly CounterPartuClassContext context;
+        private readonly Models1.Model.DBSlaynTest dBSlaynTest;
         public HomeController(ILogger<HomeController> logger, CounterPartuClassContext context)
         {
             _logger = logger;

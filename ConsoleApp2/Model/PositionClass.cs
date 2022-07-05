@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleApp2.Model
 {
-    internal class PositionClass
+    public class PositionClass
     {
         public string Id { get; set; }
         public string Name { get; set; }

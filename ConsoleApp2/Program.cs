@@ -24,7 +24,7 @@ static class Program
 
             
             context.counterPartyClass.AddRange(counterParties);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
             Console.WriteLine("OK!");

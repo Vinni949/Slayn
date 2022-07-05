@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace ConsoleApp2.Model
 {
-    internal class OrderClass
+    public class OrderClass
     {
         public string Id { get; set; }
         public string Name { get; set; }
         public string DateСreation { get; set; }
-        public string Status { get; set; }
+        public string? Status { get; set; }
         public List<PositionClass> positions { get; set; }
         public int sum { get; set; }
 

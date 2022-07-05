@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Design;
 
 
-namespace ConsoleApp2.Model
+namespace Models1.Model
 {
     public class DBSlaynTest : DbContext
     {

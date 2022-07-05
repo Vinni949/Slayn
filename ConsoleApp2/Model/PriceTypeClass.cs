@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleApp2.Model
 {
-    internal class PriceTypeClass
+    public class PriceTypeClass
     {
         public int id { get; set; }
         public string name { get; set; }
