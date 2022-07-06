@@ -8,17 +8,17 @@ namespace MVCSlayn.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly Models1.Model.DBSlaynTest dBSlaynTest;
-        public HomeController(ILogger<HomeController> logger, CounterPartuClassContext context)
+        private readonly DBSlaynTest dBSlaynTest;
+        public HomeController(ILogger<HomeController> logger, DBSlaynTest dBSlaynTest)
         {
             _logger = logger;
-            this.context = context;
+            this.dBSlaynTest = dBSlaynTest;
         }
 
         public IActionResult Index()
         {
             List<OrderClass> orders = new List<OrderClass>();
-            orders = context.OrderClass.ToList();
+            orders = dBSlaynTest.orderClass.ToList();
             return View(orders);
         }
 

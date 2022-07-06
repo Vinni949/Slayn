@@ -1,8 +1,10 @@
-using ConsoleApp2;
-using ConsoleApp2.Model;
+using Microsoft.EntityFrameworkCore;
+using Models1.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDbContext<DBSlaynTest>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DBSlaynTest")));
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 

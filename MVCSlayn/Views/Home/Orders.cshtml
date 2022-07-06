@@ -1,4 +1,10 @@
-﻿@model OrderClass
+﻿@using Models1.Model;
+
+
+@model IEnumerable<OrderClass>
 @{
 }
-<h1>@Model.Name </h1>
+@foreach(var s in Model)
+{
+    <h1>@s.Name</h1>
+}

@@ -11,6 +11,10 @@ namespace Models1.Model
 {
     public class DBSlaynTest : DbContext
     {
+        public DBSlaynTest(DbContextOptions<DBSlaynTest> options) : base(options)
+        {
+
+        }
         public DbSet<CounterPartyClass> counterPartyClass { get; set; }
         public DbSet<OrderClass> orderClass { get; set; }
         public DbSet<PositionClass> positionClass { get; set; }
