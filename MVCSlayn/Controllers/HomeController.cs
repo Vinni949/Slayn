@@ -20,12 +20,23 @@ namespace MVCSlayn.Controllers
         {
             return View();
         }
-        //[HttpPost]
-        //public IActionResult Login(string login, string password)
-        //{
-        //    string authData = $"Login: {login}   Password: {password}";
-        //    return Content(authData);
-        //}
+        [HttpPost]
+        public IActionResult Login(string login)
+        {
+            var counterParties = dBSlaynTest.counterPartyClass.SingleOrDefault(p=>p.Name==login);
+            //foreach(var counter in dBSlaynTest.counterPartyClass)
+            //{
+            //    if(counter.Name==login)
+            //    {
+            //       var counterParties = counter;
+            //        return Content(counterParties.Name+counterParties.PriceType);
+            //    }
+            //}
+            if (counterParties != null)
+                return View(counterParties);
+            else
+                return View("Введены не верные данные.");
+        }
         public IActionResult Index()
         {
             return View();
