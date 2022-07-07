@@ -15,16 +15,33 @@ namespace MVCSlayn.Controllers
             this.dBSlaynTest = dBSlaynTest;
         }
 
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+        //[HttpPost]
+        //public IActionResult Login(string login, string password)
+        //{
+        //    string authData = $"Login: {login}   Password: {password}";
+        //    return Content(authData);
+        //}
         public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Orders()
         {
             List<OrderClass> orders = new List<OrderClass>();
             orders = dBSlaynTest.orderClass.ToList();
             return View(orders);
         }
-
         public IActionResult Privacy()
         {
-            return View();
+            List<PositionClass> positions = new List<PositionClass>();
+            positions = dBSlaynTest.positionClass.ToList();
+            return View(positions);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
