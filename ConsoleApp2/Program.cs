@@ -11,38 +11,13 @@ static class Program
         var api = GetApiCredentials();
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<PositionClass> positions = new List<PositionClass>();
-        //positions=await GetApiPositions(api, positions);
-        counterParties = await GetApiCounterparties(api, counterParties);
-        GetApiCounterpartiesOrders(api, counterParties);
-
-        using (var context = new DBSlaynTest())
-        {
-            //foreach(var order in context.orderClass)
-            //{
-            //    context.orderClass.Remove(order); 
-            //}
-
-            
-            context.counterPartyClass.AddRange(counterParties);
-            await context.SaveChangesAsync();
-        }
-
-            Console.WriteLine("OK!");
-        //using(var context= new DBSlaynTest())
-        //{
-        //    foreach (var price in context.priceTypeClass)
-        //    {
-        //        context.priceTypeClass.RemoveRange(price);
-                
-        //    }
-        //    Console.WriteLine(context.positionClass.Count());
-        //    foreach (var position in context.positionClass)
-        //    {
-        //        context.positionClass.RemoveRange(position);
-
-        //    }
-        //    context.SaveChanges();
-        //}
+        positions=await GetApiPositions(api, positions);
+        //counterParties = await GetApiCounterparties(api, counterParties);
+        //GetApiCounterpartiesOrders(api, counterParties);
+        //ClearPriceTypeDB();
+        ClearPositionsDB();
+        Console.WriteLine("OK!");
+       
     }
 
 
@@ -103,12 +78,31 @@ static class Program
                         priceTypeClass.name = positionAssortment.Payload.SalePrices[a].PriceType.Name.ToString();
                         priceTypeClass.price = Convert.ToDecimal(positionAssortment.Payload.SalePrices[a].Value / 100);
                         position.PriceTypes.Add(priceTypeClass);
-                        
                     }
                 }
+                    
+                
                 else
                     Console.WriteLine(position.Id + "\t" + position.Name + "Не подгружен!!!");
                 positions.Add(position);
+                using (var context = new DBSlaynTest())
+                {
+                    if (context.positionClass.Count() > 0)
+                    {
+                        var param = context.positionClass.ToList().FirstOrDefault(position).ToString();
+                        if (param != null)
+                        {
+                            context.positionClass.Update(position);
+                            Console.WriteLine("Изменение");
+
+                        }
+                    }
+                    else
+                        context.positionClass.Add(position); Console.WriteLine("Запись");
+
+                    context.SaveChanges();
+
+                }
             }
             offset += 1000;
             Console.WriteLine(offset);
@@ -175,7 +169,7 @@ static class Program
             DateTime date = DateTime.Now.Subtract(new TimeSpan(182, 0, 0, 0));
             queryOrders.Parameter("deliveryPlannedMoment").Should().BeGreaterThan(date.ToString("yyyy-MM-dd hh:mm:ss"));
             queryOrders.Parameter("agent").Should().Be(counterParties[conterPartiecCount].Meta);
-            //queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
+            queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
             while (true)
             {
                 queryOrders.Offset(offset);
@@ -190,6 +184,7 @@ static class Program
                     var order = new OrderClass();
                     order.Id = orders.Payload.Rows[i].Id.ToString();
                     order.Name = orders.Payload.Rows[i].Name.ToString();
+                    order.Status = "Выполнен";
                     order.DateСreation = orders.Payload.Rows[i].DeliveryPlannedMoment.ToString();
                     counterParties[conterPartiecCount].counterPartyOrders.Add(order);
                     Console.WriteLine(counterParties[conterPartiecCount].counterPartyOrders[i].Name);
@@ -199,13 +194,39 @@ static class Program
 
             }
         }
+        using (var context = new DBSlaynTest())
+        {
+            context.counterPartyClass.AddRange(counterParties);
+            context.SaveChanges();
+        }
     }
 
-    //using (var context = new DBSlaynTest())
-    //{
-    //    context.counterPartyClass.AddRange(counterParties);
-    //    context.SaveChanges();
-    //} 
+    static void ClearPriceTypeDB()
+    {
+        using(var context = new DBSlaynTest())
+        {
+            foreach(var deleted in context.priceTypeClass)
+            {
+                context.priceTypeClass.Remove(deleted);
+                Console.WriteLine(deleted.id);
+                
+            }
+            context.SaveChanges();
+        }
+    }
+    static void ClearPositionsDB()
+    {
+        using (var context = new DBSlaynTest())
+        {
+            foreach (var deleted in context.positionClass)
+            {
+                context.positionClass.Remove(deleted);
+                Console.WriteLine(deleted.Name);
+
+            }
+            context.SaveChanges();
+        }
+    }
 
 
 
@@ -219,11 +240,11 @@ static class Program
 
 
 
-    
 
 
-   
-    
+
+
+
     //получение организаций
 
     //var organization = await api.Organization.GetAllAsync();

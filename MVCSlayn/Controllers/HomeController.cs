@@ -54,6 +54,7 @@ namespace MVCSlayn.Controllers
             positions = dBSlaynTest.positionClass.ToList();
             return View(positions);
         }
+        
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
