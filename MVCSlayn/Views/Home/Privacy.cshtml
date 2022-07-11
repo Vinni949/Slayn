@@ -4,8 +4,12 @@
 @model IEnumerable<PositionClass>
 @{
 }
+    <a asp-action="Basket"><button>Оформить</button></a>
+
 @foreach(var s in Model)
 {
-    <p1>@s.Name</p1>
-    <br /><br>
+    <span>@s.Name</span>
+    <a asp-action="AddToBasket" asp-route-id="@s.Id"><button>+</button></a>
+    <br />
+    
 }

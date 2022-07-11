@@ -15,7 +15,7 @@ static class Program
         //counterParties = await GetApiCounterparties(api, counterParties);
         //GetApiCounterpartiesOrders(api, counterParties);
         //ClearPriceTypeDB();
-        ClearPositionsDB();
+        //ClearPositionsDB();
         Console.WriteLine("OK!");
        
     }
@@ -50,7 +50,7 @@ static class Program
         //query.Parameter(p => p.Name).Should().Contains("Sheffilton");
         query.Expand().With(p => p.Product).And.With(p => p.Product.SalePrices);
         
-        while (true)
+        while (offset<1000)
         {
             query.Offset(offset);
             var response = await api.Assortment.GetAllAsync(query);
@@ -87,19 +87,21 @@ static class Program
                 positions.Add(position);
                 using (var context = new DBSlaynTest())
                 {
-                    if (context.positionClass.Count() > 0)
+
+                    var param = context.positionClass.ToList().SingleOrDefault(p => p.Id == position.Id);
+                    if (param != null)
                     {
-                        var param = context.positionClass.ToList().FirstOrDefault(position).ToString();
-                        if (param != null)
-                        {
-                            context.positionClass.Update(position);
-                            Console.WriteLine("Изменение");
+                        //context.positionClass.Update(position);
+                        param.Name = position.Name;
+                        Console.WriteLine("Изменение");
 
-                        }
                     }
-                    else
-                        context.positionClass.Add(position); Console.WriteLine("Запись");
 
+                    else
+                    {
+                        context.positionClass.Add(position); 
+                        Console.WriteLine("Запись");
+                    }
                     context.SaveChanges();
 
                 }

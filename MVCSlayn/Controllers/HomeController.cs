@@ -2,6 +2,7 @@
 using MVCSlayn.Models;
 using System.Diagnostics;
 using Models1.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace MVCSlayn.Controllers
 {
@@ -15,15 +16,14 @@ namespace MVCSlayn.Controllers
             this.dBSlaynTest = dBSlaynTest;
         }
 
-        [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
         [HttpPost]
-        public IActionResult Login(string login)
+        public IActionResult Login(string login,string password)
         {
-            var counterParties = dBSlaynTest.counterPartyClass.SingleOrDefault(p=>p.Name==login);
+            var counterParty = dBSlaynTest.counterPartyClass.Include(p=>p.counterPartyOrders).SingleOrDefault(p=>p.Name==login);
             //foreach(var counter in dBSlaynTest.counterPartyClass)
             //{
             //    if(counter.Name==login)
@@ -32,14 +32,16 @@ namespace MVCSlayn.Controllers
             //        return Content(counterParties.Name+counterParties.PriceType);
             //    }
             //}
-            if (counterParties != null)
-                return View(counterParties);
+            if (counterParty != null)
+                return RedirectToAction(nameof(Index),counterParty);
             else
                 return View("Введены не верные данные.");
         }
-        public IActionResult Index()
+        public IActionResult Index(CounterPartyClass counterParty)
         {
-            return View();
+            ViewData["ordersCount"] = counterParty.counterPartyOrders.Count;
+
+            return View(counterParty);
         }
 
         public IActionResult Orders()
@@ -54,9 +56,22 @@ namespace MVCSlayn.Controllers
             positions = dBSlaynTest.positionClass.ToList();
             return View(positions);
         }
-        
+        public void AddToBasket(string id)
+        {
+            if (ViewData.ContainsKey("Basket"))
+                ((List<string>)ViewData["Basket"]).Add(id);
+            else
+            {
+                ViewData["Basket"] = new List<String>();
+                ((List<string>)ViewData["Basket"]).Add(id);
+            }
+        }
+        public IActionResult Basket()
+        {
+            return View(ViewData["Basket"]);
+        }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [ResponseCache(Duration = 0 , Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });

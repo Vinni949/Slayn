@@ -4,10 +4,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp2", "ConsoleApp2\ConsoleApp2.csproj", "{BAA4AC48-37C5-4E2E-90A4-084A26FFEEC8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5706DA74-9E44-45EA-B418-B0AD5A1722E8} = {5706DA74-9E44-45EA-B418-B0AD5A1722E8}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MVCSlayn", "MVCSlayn\MVCSlayn.csproj", "{D5705D8A-A812-467A-8B93-F732792D39B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models1", "Models\Models1.csproj", "{5706DA74-9E44-45EA-B418-B0AD5A1722E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models1", "Models\Models1.csproj", "{5706DA74-9E44-45EA-B418-B0AD5A1722E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
