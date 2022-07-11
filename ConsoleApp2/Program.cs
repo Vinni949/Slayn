@@ -78,30 +78,27 @@ static class Program
                         priceTypeClass.name = positionAssortment.Payload.SalePrices[a].PriceType.Name.ToString();
                         priceTypeClass.price = Convert.ToDecimal(positionAssortment.Payload.SalePrices[a].Value / 100);
                         position.PriceTypes.Add(priceTypeClass);
+                        
                     }
                 }
-                    
-                
                 else
                     Console.WriteLine(position.Id + "\t" + position.Name + "Не подгружен!!!");
                 positions.Add(position);
                 using (var context = new DBSlaynTest())
                 {
-
-                    var param = context.positionClass.ToList().SingleOrDefault(p => p.Id == position.Id);
-                    if (param != null)
+                    if (context.positionClass.Count() > 0)
                     {
-                        //context.positionClass.Update(position);
-                        param.Name = position.Name;
-                        Console.WriteLine("Изменение");
+                        var param = context.positionClass.ToList().FirstOrDefault(position).ToString();
+                        if (param != null)
+                        {
+                            context.positionClass.Update(position);
+                            Console.WriteLine("Изменение");
 
+                        }
                     }
-
                     else
-                    {
-                        context.positionClass.Add(position); 
-                        Console.WriteLine("Запись");
-                    }
+                        context.positionClass.Add(position); Console.WriteLine("Запись");
+
                     context.SaveChanges();
 
                 }
@@ -171,7 +168,7 @@ static class Program
             DateTime date = DateTime.Now.Subtract(new TimeSpan(182, 0, 0, 0));
             queryOrders.Parameter("deliveryPlannedMoment").Should().BeGreaterThan(date.ToString("yyyy-MM-dd hh:mm:ss"));
             queryOrders.Parameter("agent").Should().Be(counterParties[conterPartiecCount].Meta);
-            queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
+            //queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
             while (true)
             {
                 queryOrders.Offset(offset);
@@ -186,7 +183,6 @@ static class Program
                     var order = new OrderClass();
                     order.Id = orders.Payload.Rows[i].Id.ToString();
                     order.Name = orders.Payload.Rows[i].Name.ToString();
-                    order.Status = "Выполнен";
                     order.DateСreation = orders.Payload.Rows[i].DeliveryPlannedMoment.ToString();
                     counterParties[conterPartiecCount].counterPartyOrders.Add(order);
                     Console.WriteLine(counterParties[conterPartiecCount].counterPartyOrders[i].Name);
@@ -196,39 +192,13 @@ static class Program
 
             }
         }
-        using (var context = new DBSlaynTest())
-        {
-            context.counterPartyClass.AddRange(counterParties);
-            context.SaveChanges();
-        }
     }
 
-    static void ClearPriceTypeDB()
-    {
-        using(var context = new DBSlaynTest())
-        {
-            foreach(var deleted in context.priceTypeClass)
-            {
-                context.priceTypeClass.Remove(deleted);
-                Console.WriteLine(deleted.id);
-                
-            }
-            context.SaveChanges();
-        }
-    }
-    static void ClearPositionsDB()
-    {
-        using (var context = new DBSlaynTest())
-        {
-            foreach (var deleted in context.positionClass)
-            {
-                context.positionClass.Remove(deleted);
-                Console.WriteLine(deleted.Name);
-
-            }
-            context.SaveChanges();
-        }
-    }
+    //using (var context = new DBSlaynTest())
+    //{
+    //    context.counterPartyClass.AddRange(counterParties);
+    //    context.SaveChanges();
+    //} 
 
 
 
@@ -242,11 +212,11 @@ static class Program
 
 
 
+    
 
 
-
-
-
+   
+    
     //получение организаций
 
     //var organization = await api.Organization.GetAllAsync();
