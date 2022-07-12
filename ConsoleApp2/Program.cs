@@ -2,8 +2,8 @@
 using Confiti.MoySklad.Remap.Client;
 using Confiti.MoySklad.Remap.Entities;
 using Confiti.MoySklad.Remap.Models;
-using ConsoleApp2.Model;
 using Microsoft.EntityFrameworkCore;
+using Models1.Model;
 static class Program
 {
     static async Task Main(string[] args)
@@ -11,13 +11,13 @@ static class Program
         var api = GetApiCredentials();
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<PositionClass> positions = new List<PositionClass>();
-        positions=await GetApiPositions(api, positions);
-        //counterParties = await GetApiCounterparties(api, counterParties);
-        //GetApiCounterpartiesOrders(api, counterParties);
+        //positions=await GetApiPositions(api, positions);
+        counterParties = await GetApiCounterparties(api, counterParties);
+        var order =await GetApiCounterpartiesOrders(api, counterParties);
         //ClearPriceTypeDB();
         //ClearPositionsDB();
         Console.WriteLine("OK!");
-       
+
     }
 
 
@@ -49,8 +49,8 @@ static class Program
         query.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/product/metadata/attributes/27fa75f7-3626-11ec-0a80-02a60003df33").Should().Be("true");
         //query.Parameter(p => p.Name).Should().Contains("Sheffilton");
         query.Expand().With(p => p.Product).And.With(p => p.Product.SalePrices);
-        
-        while (offset<1000)
+
+        while (offset < 1000)
         {
             query.Offset(offset);
             var response = await api.Assortment.GetAllAsync(query);
@@ -78,7 +78,7 @@ static class Program
                         priceTypeClass.name = positionAssortment.Payload.SalePrices[a].PriceType.Name.ToString();
                         priceTypeClass.price = Convert.ToDecimal(positionAssortment.Payload.SalePrices[a].Value / 100);
                         position.PriceTypes.Add(priceTypeClass);
-                        
+
                     }
                 }
                 else
@@ -86,18 +86,19 @@ static class Program
                 positions.Add(position);
                 using (var context = new DBSlaynTest())
                 {
-                    if (context.positionClass.Count() > 0)
-                    {
-                        var param = context.positionClass.ToList().FirstOrDefault(position).ToString();
-                        if (param != null)
-                        {
-                            context.positionClass.Update(position);
-                            Console.WriteLine("Изменение");
 
-                        }
+                    var param = context.positionClass.ToList().FirstOrDefault(p => p.Id == position.Id);
+                    if (param != null)
+                    {
+                        param = position;
+                        Console.WriteLine("Изменение");
                     }
+
                     else
-                        context.positionClass.Add(position); Console.WriteLine("Запись");
+                    {
+                        context.positionClass.Add(position);
+                        Console.WriteLine("Запись");
+                    }
 
                     context.SaveChanges();
 
@@ -105,10 +106,10 @@ static class Program
             }
             offset += 1000;
             Console.WriteLine(offset);
-            
+
         }
-        
-        
+
+
         return positions;
         Console.WriteLine("Готово");
     }
@@ -158,9 +159,10 @@ static class Program
     ///<summary>
     ///получение списка заказов контрагента
     ///</summary>
-    static async void GetApiCounterpartiesOrders(MoySkladApi api, List<CounterPartyClass> counterParties)
+    static async Task<OrderClass> GetApiCounterpartiesOrders(MoySkladApi api, List<CounterPartyClass> counterParties)
     {
-        
+        var order = new OrderClass();
+
         for (int conterPartiecCount = 0; conterPartiecCount < counterParties.Count; conterPartiecCount++)
         {
             int offset = 0;
@@ -168,7 +170,7 @@ static class Program
             DateTime date = DateTime.Now.Subtract(new TimeSpan(182, 0, 0, 0));
             queryOrders.Parameter("deliveryPlannedMoment").Should().BeGreaterThan(date.ToString("yyyy-MM-dd hh:mm:ss"));
             queryOrders.Parameter("agent").Should().Be(counterParties[conterPartiecCount].Meta);
-            //queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
+            queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
             while (true)
             {
                 queryOrders.Offset(offset);
@@ -180,18 +182,38 @@ static class Program
 
                 for (int i = 0; i < orders.Payload.Rows.Length; i++)
                 {
-                    var order = new OrderClass();
                     order.Id = orders.Payload.Rows[i].Id.ToString();
                     order.Name = orders.Payload.Rows[i].Name.ToString();
                     order.DateСreation = orders.Payload.Rows[i].DeliveryPlannedMoment.ToString();
                     counterParties[conterPartiecCount].counterPartyOrders.Add(order);
                     Console.WriteLine(counterParties[conterPartiecCount].counterPartyOrders[i].Name);
+                    using (var context = new DBSlaynTest())
+                    {
 
+                        var param = context.orderClass.ToList().FirstOrDefault(p => p.Id == order.Id);
+                        if (param != null)
+                        {
+                            param = order;
+                            Console.WriteLine("Изменение");
+                        }
+
+                        else
+                        {
+                            context.orderClass.Add(order);
+                            Console.WriteLine("Запись");
+                        }
+
+                        context.SaveChanges();
+
+                    }
                 }
                 offset += 1000;
 
             }
+
         }
+        return order;
+
     }
 
     //using (var context = new DBSlaynTest())
@@ -212,11 +234,11 @@ static class Program
 
 
 
-    
 
 
-   
-    
+
+
+
     //получение организаций
 
     //var organization = await api.Organization.GetAllAsync();

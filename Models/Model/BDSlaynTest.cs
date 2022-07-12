@@ -11,6 +11,10 @@ namespace Models1.Model
 {
     public class DBSlaynTest : DbContext
     {
+        public DBSlaynTest()
+        {
+        }
+
         public DBSlaynTest(DbContextOptions<DBSlaynTest> options) : base(options)
         {
 
