@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Models1.Model;
 
@@ -7,7 +8,11 @@ builder.Services.AddDbContext<DBSlaynTest>(options =>
     options.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = BdSlaynTest; Trusted_Connection = True;"));
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie(options => //CookieAuthenticationOptions
+        {
+            options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Home/Login");
+        });
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -26,7 +31,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthentication();    // аутентификация
+app.UseAuthorization();     // авторизация
 
 app.MapControllerRoute(
     name: "default",
