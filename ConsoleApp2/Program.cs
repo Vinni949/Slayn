@@ -12,8 +12,14 @@ static class Program
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<PositionClass> positions = new List<PositionClass>();
         //positions=await GetApiPositions(api, positions);
-        counterParties = await GetApiCounterparties(api, counterParties);
-        var order =await GetApiCounterpartiesOrders(api, counterParties);
+        //counterParties = await GetApiCounterparties(api, counterParties);
+        //var order =await GetApiCounterpartiesOrders(api, counterParties);
+        var query = new ApiParameterBuilder<CustomerOrderQuery>();
+
+        query.Expand()
+            .With(p => p.Positions);
+        
+        var response = await api.CustomerOrder.GetAsync(Guid.Parse("02ea68a4-880d-11ec-0a80-03180033e7c4"),query);
         //ClearPriceTypeDB();
         //ClearPositionsDB();
         Console.WriteLine("OK!");
@@ -215,6 +221,47 @@ static class Program
         return order;
 
     }
+
+    /// <summary>
+    /// получение товаров из заказов
+    /// </summary>
+    /// <param name="api"></param>
+    /// <param name="counterParties"></param>
+    /// <returns></returns>
+    static async Task<PositionClass> GetApiCounterpartiesOrdersPositions(MoySkladApi api, List<CounterPartyClass> counterParties)
+    {
+        var position = new PositionClass();
+        for (int conterPartiecCount = 0; conterPartiecCount < counterParties.Count; conterPartiecCount++)
+        {
+            int offset = 0;
+            var query = new ApiParameterBuilder<CustomerOrderQuery>();
+            query.Expand()
+                .With(p => p.Positions);
+
+            query.Offset(offset);
+
+            for (int i = 0; i < counterParties.Count; i++)
+            {
+                for (int A = 0; A < counterParties[i].counterPartyOrders.Count; A++)
+                {
+                    var order = await api.CustomerOrder.GetAsync(Guid.Parse(counterParties[i].counterPartyOrders[A].Id), query);
+                    for (var j = 0; j < order.Payload.Positions.Rows.Count(); j++)
+                    {
+                        position.Id = order.Payload.Positions.Rows[j].Id.ToString();
+                        position.Name = order.Payload.Positions.Rows[j].Name;
+                        position.priceOldOrder = order.Payload.Positions.Rows[j].Price.ToString();
+                        //position.quantity = order.Payload.Positions.Rows[j].Quantity.ToString();
+                        counterParties[i].counterPartyOrders[A].positions.Add(position);
+                    }
+                }
+            }
+            offset += 1000;
+        }
+        return position;
+    }
+
+
+
 
     //using (var context = new DBSlaynTest())
     //{
