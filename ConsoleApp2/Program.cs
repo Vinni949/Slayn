@@ -12,14 +12,9 @@ static class Program
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<PositionClass> positions = new List<PositionClass>();
         //positions=await GetApiPositions(api, positions);
-        //counterParties = await GetApiCounterparties(api, counterParties);
-        //var order =await GetApiCounterpartiesOrders(api, counterParties);
-        var query = new ApiParameterBuilder<CustomerOrderQuery>();
-
-        query.Expand()
-            .With(p => p.Positions);
-        
-        var response = await api.CustomerOrder.GetAsync(Guid.Parse("02ea68a4-880d-11ec-0a80-03180033e7c4"),query);
+        counterParties = await GetApiCounterparties(api, counterParties);
+        var order =await GetApiCounterpartiesOrders(api, counterParties);
+        var position = await GetApiCounterpartiesOrdersPositions(api, counterParties);
         //ClearPriceTypeDB();
         //ClearPositionsDB();
         Console.WriteLine("OK!");
@@ -248,7 +243,7 @@ static class Program
                     for (var j = 0; j < order.Payload.Positions.Rows.Count(); j++)
                     {
                         position.Id = order.Payload.Positions.Rows[j].Id.ToString();
-                        position.Name = order.Payload.Positions.Rows[j].Name;
+                        //position.Name = order.Payload.Positions.Rows[j].Name.ToString();
                         position.priceOldOrder = order.Payload.Positions.Rows[j].Price.ToString();
                         //position.quantity = order.Payload.Positions.Rows[j].Quantity.ToString();
                         counterParties[i].counterPartyOrders[A].positions.Add(position);
