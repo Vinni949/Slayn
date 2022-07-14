@@ -12,6 +12,6 @@ namespace Models1.Model
         public string Name { get; set; }
         public string? priceOldOrder { get; set; }
         public List<PriceTypeClass>? PriceTypes { get; set; }
-        public int OldQuantity { get; set; }
+        public double OldQuantity { get; set; }
     }
 }

@@ -245,7 +245,7 @@ static class Program
                         position.Id = order.Payload.Positions.Rows[j].Id.ToString();
                         //position.Name = order.Payload.Positions.Rows[j].Name.ToString();
                         position.priceOldOrder = order.Payload.Positions.Rows[j].Price.ToString();
-                        //position.quantity = order.Payload.Positions.Rows[j].Quantity.ToString();
+                        position.OldQuantity = order.Payload.Positions.Rows[j].Quantity.GetValueOrDefault();
                         counterParties[i].counterPartyOrders[A].positions.Add(position);
                     }
                 }

@@ -23,6 +23,7 @@ namespace Models1.Model
         public DbSet<OrderClass> orderClass { get; set; }
         public DbSet<PositionClass> positionClass { get; set; }
         public DbSet<PriceTypeClass> priceTypeClass { get; set; }
+        public DbSet<UserBasket> userBaskets { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(@"Server = (localdb)\mssqllocaldb;Database = BdSlaynTest; Trusted_Connection = True;");
