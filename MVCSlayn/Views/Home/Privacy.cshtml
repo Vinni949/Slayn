@@ -1,9 +1,8 @@
 ﻿@using Models1.Model;
 
 
-@model IEnumerable<PositionClass>
-@{
-}
+@model PagedList<PositionClass>
+
     <a asp-action="Basket"><button>Оформить</button></a>
     <br />
 
@@ -13,4 +12,20 @@
     <a asp-action="AddToBasket" asp-route-id="@s.Id"><button>+</button></a>
     <br />
     
+}
+@if (Model.HasPreviousPage())
+{
+    <a asp-action="Orders" asp-route-page="@(Model.CurrentPage-1)">
+        <button>
+        назад
+        </button>
+        </a>
+}
+@if (Model.HasNextPage())
+{
+    <a asp-action="Orders" asp-route-page="@(Model.CurrentPage+1)">
+        <button>
+        вперед
+        </button>
+        </a>
 }

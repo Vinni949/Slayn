@@ -43,7 +43,6 @@ namespace MVCSlayn.Controllers
         [Authorize]
         public IActionResult Index(CounterPartyClass counterParty)
         {
-            ViewData["ordersCount"] = counterParty.counterPartyOrders.Count;
 
             return View(counterParty);
         }
@@ -57,11 +56,13 @@ namespace MVCSlayn.Controllers
             return View(new PagedList<OrderClass>(page.Value,dBSlaynTest.orderClass.Count(),orders,pageSize));
         }
         [Authorize]
-        public IActionResult Privacy()
+        public IActionResult Privacy(int? page)
         {
+            int pageSize = 5;
+            page = page ?? 0;
             List<PositionClass> positions = new List<PositionClass>();
-            positions = dBSlaynTest.positionClass.ToList();
-            return View(positions);
+            positions = dBSlaynTest.positionClass.Skip(pageSize * page.Value).Take(pageSize).ToList(); ;
+            return View(new PagedList<PositionClass>(page.Value, dBSlaynTest.positionClass.Count(),positions,pageSize));
         }
         [Authorize]
         public void AddToBasket(string id)
