@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models1.Model;
 
@@ -10,9 +11,10 @@ using Models1.Model;
 namespace Models1.Migrations
 {
     [DbContext(typeof(DBSlaynTest))]
-    partial class DBSlaynTestModelSnapshot : ModelSnapshot
+    [Migration("20220714152216_AddFieldPositionCClass")]
+    partial class AddFieldPositionCClass
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -88,17 +90,14 @@ namespace Models1.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("OldQuantity")
-                        .HasColumnType("float");
+                    b.Property<int>("OldQuantity")
+                        .HasColumnType("int");
 
                     b.Property<string>("OrderClassId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("priceOldOrder")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("quantity")
-                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -132,34 +131,6 @@ namespace Models1.Migrations
                     b.ToTable("priceTypeClass");
                 });
 
-            modelBuilder.Entity("Models1.Model.UserBasket", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("Count")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CounterPartyId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("PositionId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CounterPartyId");
-
-                    b.HasIndex("PositionId");
-
-                    b.ToTable("userBaskets");
-                });
-
             modelBuilder.Entity("Models1.Model.OrderClass", b =>
                 {
                     b.HasOne("Models1.Model.CounterPartyClass", null)
@@ -181,29 +152,8 @@ namespace Models1.Migrations
                         .HasForeignKey("PositionClassId");
                 });
 
-            modelBuilder.Entity("Models1.Model.UserBasket", b =>
-                {
-                    b.HasOne("Models1.Model.CounterPartyClass", "CounterParty")
-                        .WithMany("Basket")
-                        .HasForeignKey("CounterPartyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Models1.Model.PositionClass", "Position")
-                        .WithMany()
-                        .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CounterParty");
-
-                    b.Navigation("Position");
-                });
-
             modelBuilder.Entity("Models1.Model.CounterPartyClass", b =>
                 {
-                    b.Navigation("Basket");
-
                     b.Navigation("counterPartyOrders");
                 });
 

@@ -275,17 +275,18 @@ static class Program
                 position.priceOldOrder = positions.Payload.Positions.Rows[j].Price.ToString();
                 position.quantity = positions.Payload.Positions.Rows[j].Quantity.Value;
 
-                using (var context = new DBSlaynTest())
+            for (int i = 0; i < counterParties.Count; i++)
+            {
+                for (int A = 0; A < counterParties[i].counterPartyOrders.Count; A++)
                 {
-                    var param = context.orderClass.Include(p => p.positions).ToList().FirstOrDefault(p => p.Id == order.Id);
-                    if (param != null)
+                    var order = await api.CustomerOrder.GetAsync(Guid.Parse(counterParties[i].counterPartyOrders[A].Id), query);
+                    for (var j = 0; j < order.Payload.Positions.Rows.Count(); j++)
                     {
-                        if (param.positions == null || param.positions.SingleOrDefault(p => p.Id == position.Id) == null)
-                        {
-                            param.positions.Add(position);
-                            Console.WriteLine("Добавление");
-                            context.SaveChanges();
-                        }
+                        position.Id = order.Payload.Positions.Rows[j].Id.ToString();
+                        //position.Name = order.Payload.Positions.Rows[j].Name.ToString();
+                        position.priceOldOrder = order.Payload.Positions.Rows[j].Price.ToString();
+                        position.OldQuantity = order.Payload.Positions.Rows[j].Quantity.GetValueOrDefault();
+                        counterParties[i].counterPartyOrders[A].positions.Add(position);
                     }
                     else
                         Console.WriteLine("заказа");

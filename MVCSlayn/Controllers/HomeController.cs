@@ -34,17 +34,17 @@ namespace MVCSlayn.Controllers
 
             if (counterParty != null)
             {
-                await AuthAsync(loginViewModel.Login);
-                return RedirectToAction(nameof(Index), counterParty);
+                await AuthAsync(counterParty.Id);
+                return RedirectToAction(nameof(Index));
             }
             else
                 return View(loginViewModel);
         }
         [Authorize]
-        public IActionResult Index(CounterPartyClass counterParty)
+        public IActionResult Index()
         {
-
-            return View(counterParty);
+            string id = User.Identity.Name;
+            return View(dBSlaynTest.counterPartyClass.SingleOrDefault(p => p.Id == id));
         }
         [Authorize]
         public IActionResult Orders(int? page)
@@ -65,15 +65,26 @@ namespace MVCSlayn.Controllers
             return View(new PagedList<PositionClass>(page.Value, dBSlaynTest.positionClass.Count(),positions,pageSize));
         }
         [Authorize]
-        public void AddToBasket(string id)
+        [HttpPost]
+        public IActionResult AddToBasket(string id,int page)
         {
-            if (ViewData.ContainsKey("Basket"))
-                ((List<string>)ViewData["Basket"]).Add(id);
+            string counterPartyId = User.Identity.Name;
+            var basketUser = dBSlaynTest.userBaskets.SingleOrDefault(p => p.CounterPartyId == counterPartyId && p.PositionId == id);
+            if (basketUser != null)
+            {
+                basketUser.Count++;
+            }
             else
             {
-                ViewData["Basket"] = new List<String>();
-                ((List<string>)ViewData["Basket"]).Add(id);
+                UserBasket product = new UserBasket();
+                product.PositionId = id;
+                product.CounterPartyId = counterPartyId;
+                product.Count = 1;
+                dBSlaynTest.userBaskets.Add(product);
             }
+            dBSlaynTest.SaveChanges();
+
+            return RedirectToAction(nameof(Privacy),page);
         }
         public IActionResult Basket()
         {
@@ -86,12 +97,12 @@ namespace MVCSlayn.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        private async Task AuthAsync(string userName)
+        private async Task AuthAsync(string userId)
         {
             // создаем один claim
             var claims = new List<Claim>
             {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, userName)
+                new Claim(ClaimsIdentity.DefaultNameClaimType, userId)
             };
             // создаем объект ClaimsIdentity
             ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);

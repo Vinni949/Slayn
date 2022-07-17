@@ -15,6 +15,7 @@ namespace Models1.Model
         public string LoginOfAccessToTheLC { get; set; }
         public string LoginOfPsswordToTheLC { get; set; }
         public string Meta { get; set; }
+        public List<UserBasket> Basket { get; set; }
 
     }
 }
