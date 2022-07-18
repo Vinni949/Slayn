@@ -1,6 +1,6 @@
-﻿@model IEnumerable<string>
+﻿@model IEnumerable<BasketViewModel>
 
 @foreach(var pos in Model)
 {
-    <p>pos</p>
+    <p>@pos.Name,@pos.Count</p>
 }

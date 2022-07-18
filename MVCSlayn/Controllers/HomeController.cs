@@ -43,34 +43,31 @@ namespace MVCSlayn.Controllers
         [Authorize]
         public IActionResult Index()
         {
-<<<<<<< HEAD
             string id = User.Identity.Name;
             return View(dBSlaynTest.counterPartyClass.SingleOrDefault(p => p.Id == id));
-=======
-            ViewData["ordersCount"] = counterParty.counterPartyOrders.Count;
-
-            return View(counterParty);
->>>>>>> parent of a7de78b (Add PositionToOrders)
         }
         [Authorize]
         public IActionResult Orders(int? page)
         {
-            int pageSize = 5;
+            int pageSize = 20;
             page = page ?? 0;
             List<OrderClass> orders = new List<OrderClass>();
-            orders = dBSlaynTest.orderClass.Skip(pageSize * page.Value).Take(pageSize).ToList();
+            orders = dBSlaynTest.orderClass.Where(p=>p.CounterPartyClassId==User.Identity.Name).Skip(pageSize * page.Value).Take(pageSize).ToList();
+            
             return View(new PagedList<OrderClass>(page.Value,dBSlaynTest.orderClass.Count(),orders,pageSize));
         }
         [Authorize]
-        public IActionResult Privacy()
+        public IActionResult Privacy(int? page)
         {
+            int pageSize = 20;
+            page = page ?? 0;
             List<PositionClass> positions = new List<PositionClass>();
-            positions = dBSlaynTest.positionClass.ToList();
-            return View(positions);
+            positions = dBSlaynTest.positionClass.Skip(pageSize * page.Value).Take(pageSize).ToList();
+            return View(new PagedList<PositionClass>(page.Value, dBSlaynTest.positionClass.Count(),positions,pageSize));
         }
         [Authorize]
         [HttpPost]
-        public IActionResult AddToBasket(string id,int page)
+        public IActionResult AddToBasket(string id,int currentPage)
         {
             string counterPartyId = User.Identity.Name;
             var basketUser = dBSlaynTest.userBaskets.SingleOrDefault(p => p.CounterPartyId == counterPartyId && p.PositionId == id);
@@ -88,13 +85,21 @@ namespace MVCSlayn.Controllers
             }
             dBSlaynTest.SaveChanges();
 
-            return RedirectToAction(nameof(Privacy),page);
+            return RedirectToAction(nameof(Privacy), currentPage);
         }
-        public IActionResult Basket()
+        public IActionResult Basket(int? page)
         {
-            return View(ViewData["Basket"]);
+            int pageSize = 20;
+            page = page ?? 0;
+            var basketPositions = from b in dBSlaynTest.userBaskets
+                                  join p in dBSlaynTest.positionClass
+                                  on b.PositionId equals p.Id
+                                  where b.CounterPartyId == User.Identity.Name
+                                  select new BasketViewModel(b.Count, p.Name);
+                               
+            return View(basketPositions);
         }
-
+        
         [ResponseCache(Duration = 0 , Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
@@ -115,4 +120,5 @@ namespace MVCSlayn.Controllers
 
         }
     }
+    
 }
