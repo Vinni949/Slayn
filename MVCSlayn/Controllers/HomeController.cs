@@ -43,8 +43,14 @@ namespace MVCSlayn.Controllers
         [Authorize]
         public IActionResult Index()
         {
+<<<<<<< HEAD
             string id = User.Identity.Name;
             return View(dBSlaynTest.counterPartyClass.SingleOrDefault(p => p.Id == id));
+=======
+            ViewData["ordersCount"] = counterParty.counterPartyOrders.Count;
+
+            return View(counterParty);
+>>>>>>> parent of a7de78b (Add PositionToOrders)
         }
         [Authorize]
         public IActionResult Orders(int? page)
@@ -56,13 +62,11 @@ namespace MVCSlayn.Controllers
             return View(new PagedList<OrderClass>(page.Value,dBSlaynTest.orderClass.Count(),orders,pageSize));
         }
         [Authorize]
-        public IActionResult Privacy(int? page)
+        public IActionResult Privacy()
         {
-            int pageSize = 5;
-            page = page ?? 0;
             List<PositionClass> positions = new List<PositionClass>();
-            positions = dBSlaynTest.positionClass.Skip(pageSize * page.Value).Take(pageSize).ToList(); ;
-            return View(new PagedList<PositionClass>(page.Value, dBSlaynTest.positionClass.Count(),positions,pageSize));
+            positions = dBSlaynTest.positionClass.ToList();
+            return View(positions);
         }
         [Authorize]
         [HttpPost]
