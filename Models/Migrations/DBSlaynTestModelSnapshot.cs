@@ -97,6 +97,9 @@ namespace Models1.Migrations
                     b.Property<string>("priceOldOrder")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<double>("quantity")
+                        .HasColumnType("float");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OrderClassId");

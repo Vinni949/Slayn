@@ -12,6 +12,10 @@ namespace Models1.Model
         public string Name { get; set; }
         public string? priceOldOrder { get; set; }
         public List<PriceTypeClass>? PriceTypes { get; set; }
+<<<<<<< HEAD
         public double OldQuantity { get; set; }
+=======
+        public int quantity { get; set; }
+>>>>>>> parent of a7de78b (Add PositionToOrders)
     }
 }

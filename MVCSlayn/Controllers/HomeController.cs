@@ -43,8 +43,14 @@ namespace MVCSlayn.Controllers
         [Authorize]
         public IActionResult Index()
         {
+<<<<<<< HEAD
             string id = User.Identity.Name;
             return View(dBSlaynTest.counterPartyClass.SingleOrDefault(p => p.Id == id));
+=======
+            ViewData["ordersCount"] = counterParty.counterPartyOrders.Count;
+
+            return View(counterParty);
+>>>>>>> parent of a7de78b (Add PositionToOrders)
         }
         [Authorize]
         public IActionResult Orders(int? page)

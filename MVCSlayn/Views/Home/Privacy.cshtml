@@ -10,9 +10,15 @@
 @foreach(var s in Model)
 {
     <span>@s.Name</span>
+<<<<<<< HEAD
     <form asp-action="AddToBasket" method="post">
         <input type="hidden" value="@s.Id" asp-for="@s.Id"/>
     <input type="submit" value="+"/>
     </form>
      <br />
+=======
+    <a asp-action="AddToBasket" asp-route-id="@s.Id"><button>+</button></a>
+    <br />
+    
+>>>>>>> parent of a7de78b (Add PositionToOrders)
 }
