@@ -11,12 +11,23 @@ static class Program
         var api = GetApiCredentials();
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<PositionClass> positions = new List<PositionClass>();
-        //positions=await GetApiPositions(api, positions);
+
+        positions=await GetApiPositions(api, positions);
+
         //counterParties = await GetApiCounterparties(api, counterParties);
+
         //var order = await GetApiCounterpartiesOrders(api, counterParties);
-        var position = await GetApiCounterpartiesOrdersPositions(api);
+
+        //var position = await GetApiCounterpartiesOrdersPositions(api);
+
         //ClearPriceTypeDB();
+
         //ClearPositionsDB();
+
+        //остатки по складам
+
+       
+
         Console.WriteLine("OK!");
 
     }
@@ -47,6 +58,7 @@ static class Program
     static async Task<List<PositionClass>> GetApiPositions(MoySkladApi api, List<PositionClass> positions)
     { int offset = 0;
         var query = new AssortmentApiParameterBuilder();
+        
         query.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/product/metadata/attributes/27fa75f7-3626-11ec-0a80-02a60003df33").Should().Be("true");
         //query.Parameter(p => p.Name).Should().Contains("Sheffilton");
         query.Expand().With(p => p.Product).And.With(p => p.Product.SalePrices);
@@ -115,9 +127,7 @@ static class Program
         Console.WriteLine("Готово");
     }
 
-    //остатки по складам
-
-    //var remains=await api.Store.GetAllAsync();
+    
 
 
     ///<summary>
@@ -261,34 +271,53 @@ static class Program
             for (var j = 0; j < positions.Payload.Positions.Rows.Count(); j++)
             {
                 position.Id = positions.Payload.Positions.Rows[j].Id.ToString();
-                var queryPositions = new AssortmentApiParameterBuilder();
-                queryPositions.Expand().With(p => p.Product);
-                queryPositions.Parameter("id").Should().Be(positions.Payload.Positions.Rows[j].Id.ToString());
-                var intermediatePositions = await api.Assortment.GetAllAsync(queryPositions);
-                if (intermediatePositions.Payload.Rows.Count() > 0)
-                {
-                    position.Name = intermediatePositions.Payload.Rows[0].Name.ToString();
-                    Console.WriteLine(position.Name);
-                }
-                else
-                    position.Name = "???????";
-                position.priceOldOrder = positions.Payload.Positions.Rows[j].Price.ToString();
-                position.OldQuantity = positions.Payload.Positions.Rows[j].Quantity.Value;
-
+                bool paramPosition = true;
                 using (var context = new DBSlaynTest())
                 {
-                    var param = context.orderClass.Include(p => p.positions).ToList().FirstOrDefault(p => p.Id == order.Id);
-                    if (param != null)
+                    var posId = context.positionClass.SingleOrDefault(p => p.Id == position.Id);
+                    if(posId!=null)
                     {
-                        if (param.positions == null || param.positions.SingleOrDefault(p => p.Id == position.Id) == null)
-                        {
-                            param.positions.Add(position);
-                            Console.WriteLine("Добавление");
-                            context.SaveChanges();
-                        }
+                        position.Name = posId.Name;
+                        position.priceOldOrder = posId.priceOldOrder;
+                        position.OldQuantity = posId.OldQuantity;
+                        paramPosition = false;
+                        order.sum += order.sum+position.priceOldOrder.Value;
+                    }
+                }
+                if (paramPosition == true)
+                {
+                    var queryPositions = new AssortmentApiParameterBuilder();
+                    queryPositions.Expand().With(p => p.Product);
+                    queryPositions.Parameter("id").Should().Be(positions.Payload.Positions.Rows[j].Id.ToString());
+                    var intermediatePositions = await api.Assortment.GetAllAsync(queryPositions);
+                    if (intermediatePositions.Payload.Rows.Count() > 0)
+                    {
+                        position.Name = intermediatePositions.Payload.Rows[0].Name.ToString();
+                        Console.WriteLine(position.Name);
                     }
                     else
-                        Console.WriteLine("заказа");
+                        position.Name = "???????";
+                    position.priceOldOrder = positions.Payload.Positions.Rows[j].Price.Value;
+                    position.OldQuantity = positions.Payload.Positions.Rows[j].Quantity.Value;
+                    order.sum +=positions.Payload.Positions.Rows[j].Price.Value;
+                    
+                    using (var context = new DBSlaynTest())
+                    {
+                        var param = context.orderClass.Include(p => p.positions).ToList().FirstOrDefault(p => p.Id == order.Id);
+                        param.sum=order.sum;
+                        if (param != null)
+                        {
+                            if (param.positions == null || param.positions.SingleOrDefault(p => p.Id == position.Id) == null)
+                            {
+                                param.positions.Add(position);
+                                Console.WriteLine("Добавление");
+                            }
+                        }
+                        else
+                            Console.WriteLine("заказа");
+                        context.SaveChanges();
+
+                    }
                 }
             }
         }
@@ -300,11 +329,6 @@ static class Program
 
 
 
-    //using (var context = new DBSlaynTest())
-    //{
-    //    context.counterPartyClass.AddRange(counterParties);
-    //    context.SaveChanges();
-    //} 
 
 
 
@@ -334,10 +358,5 @@ static class Program
     //var newOrder = new CustomerOrder() { Agent = contrs.Payload.Rows[0], Organization = organization.Payload.Rows[1] };
     //await api.CustomerOrder.CreateAsync(newOrder);
 
-    //поиск опреденного заказа и выгрузка товаров
-
-    //var queryOrdersTest = new ApiParameterBuilder<CustomerOrdersQuery>;
-    //queryOrdersTest.Parameter("A38384711");
-    //var orderTestName = api.CustomerOrder.GetAsync(Guid.ParseExact(queryOrdersTest));
-
+   
 }

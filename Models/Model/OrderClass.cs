@@ -13,7 +13,7 @@ namespace Models1.Model
         public string DateСreation { get; set; }
         public string? Status { get; set; }
         public List<PositionClass> positions { get; set; }
-        public int sum { get; set; }
+        public long sum { get; set; }
         public string CounterPartyClassId { get; set; }
 
     }

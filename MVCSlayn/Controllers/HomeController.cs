@@ -31,7 +31,6 @@ namespace MVCSlayn.Controllers
             
             var counterParty = dBSlaynTest.counterPartyClass.Include(p=>p.counterPartyOrders).SingleOrDefault(p=>p.LoginOfAccessToTheLC==loginViewModel.Login
             &&p.LoginOfPsswordToTheLC==loginViewModel.Password);
-
             if (counterParty != null)
             {
                 await AuthAsync(counterParty.Id);
@@ -44,6 +43,8 @@ namespace MVCSlayn.Controllers
         public IActionResult Index()
         {
             string id = User.Identity.Name;
+            var count = dBSlaynTest.counterPartyClass.Include(p => p.counterPartyOrders).SingleOrDefault(p => p.Id == User.Identity.Name);
+            int counorder = count.counterPartyOrders.Count;
             return View(dBSlaynTest.counterPartyClass.SingleOrDefault(p => p.Id == id));
         }
         [Authorize]
@@ -52,8 +53,7 @@ namespace MVCSlayn.Controllers
             int pageSize = 20;
             page = page ?? 0;
             List<OrderClass> orders = new List<OrderClass>();
-            orders = dBSlaynTest.orderClass.Where(p=>p.CounterPartyClassId==User.Identity.Name).Skip(pageSize * page.Value).Take(pageSize).ToList();
-            
+            orders = dBSlaynTest.orderClass.Include(p=>p.positions).Where(p=>p.CounterPartyClassId==User.Identity.Name).Skip(pageSize * page.Value).Take(pageSize).ToList();
             return View(new PagedList<OrderClass>(page.Value,dBSlaynTest.orderClass.Count(),orders,pageSize));
         }
         [Authorize]

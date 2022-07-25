@@ -10,7 +10,7 @@ namespace Models1.Model
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public string? priceOldOrder { get; set; }
+        public long? priceOldOrder { get; set; }
         public List<PriceTypeClass>? PriceTypes { get; set; }
         public double OldQuantity { get; set; }
     }

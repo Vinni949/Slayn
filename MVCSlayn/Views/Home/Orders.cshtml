@@ -6,6 +6,14 @@
 }
 @foreach(var s in Model)
 {
+    <label>Select a value: </label><select id="selectvalue">
+    <option>@s.Name</option>
+    @foreach(var pos in s.positions)
+        {
+            <option>@pos.Name @pos.OldQuantity @pos.priceOldOrder</option>
+            
+        }
+    </select> 
     <br><p1>@s.Name , @s.DateСreation , @s.sum , @s.Status</p1><br />
 }
 @if (Model.HasPreviousPage())
