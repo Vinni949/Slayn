@@ -26,8 +26,7 @@ static class Program
 
         //остатки по складам
 
-       
-
+        var sklad = await api.Store.GetAllAsync();
         Console.WriteLine("OK!");
 
     }
@@ -58,11 +57,10 @@ static class Program
     static async Task<List<PositionClass>> GetApiPositions(MoySkladApi api, List<PositionClass> positions)
     { int offset = 0;
         var query = new AssortmentApiParameterBuilder();
-        
+        var sklad = await api.Store.GetAllAsync();
         query.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/product/metadata/attributes/27fa75f7-3626-11ec-0a80-02a60003df33").Should().Be("true");
-        //query.Parameter(p => p.Name).Should().Contains("Sheffilton");
         query.Expand().With(p => p.Product).And.With(p => p.Product.SalePrices);
-
+        query.Parameter(p => p.StockStore).Should().Be(sklad.Payload.Rows[0].Meta);
         while (true)
         {
             query.Offset(offset);
@@ -103,7 +101,9 @@ static class Program
                     var param = context.positionClass.ToList().FirstOrDefault(p => p.Id == position.Id);
                     if (param != null)
                     {
-                        param = position;
+                        param.Name = position.Name;
+                        param.PriceTypes = position.PriceTypes;
+                        param.QuantityStock = position.QuantityStock;
                         Console.WriteLine("Изменение");
                     }
 
