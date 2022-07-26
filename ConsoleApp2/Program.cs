@@ -12,17 +12,14 @@ static class Program
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<PositionClass> positions = new List<PositionClass>();
 
-        positions=await GetApiPositions(api, positions);
-
         //counterParties = await GetApiCounterparties(api, counterParties);
 
         //var order = await GetApiCounterpartiesOrders(api, counterParties);
 
-        //var position = await GetApiCounterpartiesOrdersPositions(api);
+        var position = await GetApiCounterpartiesOrdersPositions(api);
+        //positions = await GetApiPositions(api, positions);
+        //positions = await GetPositionClassAsync(api);
 
-        //ClearPriceTypeDB();
-
-        //ClearPositionsDB();
 
         //остатки по складам
 
@@ -55,7 +52,8 @@ static class Program
     ///получение списка товаров 
     ///</summary>
     static async Task<List<PositionClass>> GetApiPositions(MoySkladApi api, List<PositionClass> positions)
-    { int offset = 0;
+    {
+        int offset = 0;
         var query = new AssortmentApiParameterBuilder();
         var sklad = await api.Store.GetAllAsync();
         query.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/product/metadata/attributes/27fa75f7-3626-11ec-0a80-02a60003df33").Should().Be("true");
@@ -195,10 +193,10 @@ static class Program
     static async Task<OrderClass> GetApiCounterpartiesOrders(MoySkladApi api, List<CounterPartyClass> counterParties)
     {
         var order = new OrderClass();
-
+        
         for (int conterPartiecCount = 0; conterPartiecCount < counterParties.Count; conterPartiecCount++)
         {
-            int offset = 0;
+            int offset = 0; 
             var queryOrders = new ApiParameterBuilder<CustomerOrdersQuery>();
             DateTime date = DateTime.Now.Subtract(new TimeSpan(182, 0, 0, 0));
             queryOrders.Parameter("deliveryPlannedMoment").Should().BeGreaterThan(date.ToString("yyyy-MM-dd hh:mm:ss"));
@@ -251,12 +249,23 @@ static class Program
     /// <returns></returns>
     static async Task<PositionClass> GetApiCounterpartiesOrdersPositions(MoySkladApi api)
     {
+        using (var context = new DBSlaynTest())
+        {
+            foreach (var a in context.priceTypeClass)
+            { context.priceTypeClass.Remove(a); }
+            context.SaveChanges();
+        }
+        using (var context = new DBSlaynTest())
+        {
+            foreach (var a in context.positionClass)
+            { context.positionClass.Remove(a); }
+            context.SaveChanges();
+        }
         var position = new PositionClass();
 
         int offset = 0;
         var query = new ApiParameterBuilder<CustomerOrderQuery>();
-        query.Expand()
-            .With(p => p.Positions);
+        query.Expand().With(p => p.Positions);
         List<OrderClass> orders = new List<OrderClass>();
         using (var context = new DBSlaynTest())
         {
@@ -268,6 +277,7 @@ static class Program
         foreach (var order in orders)
         {
             var positions = await api.CustomerOrder.GetAsync(Guid.Parse(order.Id), query);
+            var positionsMeta = positions.Payload.Positions.Rows[0].Assortment.Meta.Href;
             for (var j = 0; j < positions.Payload.Positions.Rows.Count(); j++)
             {
                 position.Id = positions.Payload.Positions.Rows[j].Id.ToString();
@@ -287,9 +297,9 @@ static class Program
                 if (paramPosition == true)
                 {
                     var queryPositions = new AssortmentApiParameterBuilder();
-                    queryPositions.Expand().With(p => p.Product);
                     queryPositions.Parameter("id").Should().Be(positions.Payload.Positions.Rows[j].Id.ToString());
                     var intermediatePositions = await api.Assortment.GetAllAsync(queryPositions);
+                    
                     if (intermediatePositions.Payload.Rows.Count() > 0)
                     {
                         position.Name = intermediatePositions.Payload.Rows[0].Name.ToString();
@@ -326,7 +336,32 @@ static class Program
         return position;
     }
 
-
+    /// <summary>
+    /// Получение товаров из старых заказов
+    /// </summary>
+    /// <param name="api"></param>
+    /// <returns></returns>
+    static async Task<List<PositionClass>> GetPositionClassAsync(MoySkladApi api) 
+    {
+        List<PositionClass> positions = new List<PositionClass>();
+        PositionClass positionOldOrder = new PositionClass();
+        var query = new AssortmentApiParameterBuilder(); 
+        
+        using(var context = new DBSlaynTest())
+        {
+            foreach(var position in context.positionClass)
+            {
+                //if(position.Name== "???????")
+                positions.Add(position);
+            }
+        }
+        foreach(var position in positions)
+        {
+            query.Parameter(p => p.Id).Should().Be(Guid.Parse("f1bd5fc1-fcd4-11e6-7a69-9711000076e4"));
+            var positionOld = await api.Assortment.GetAllAsync(query);
+        }
+        return positions;
+    }
 
 
 

@@ -15,5 +15,6 @@ namespace Models1.Model
         public double OldQuantity { get; set; }
         public double? QuantityStock { get; set; }
         public double? QuantityAllStok { get; set; }
+        public string? Meta { get; set; }
     }
 }
