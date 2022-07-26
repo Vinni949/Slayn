@@ -11,15 +11,10 @@ static class Program
         var api = GetApiCredentials();
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<PositionClass> positions = new List<PositionClass>();
-
-        //counterParties = await GetApiCounterparties(api, counterParties);
-
-        //var order = await GetApiCounterpartiesOrders(api, counterParties);
-
+        counterParties = await GetApiCounterparties(api, counterParties);
+        var order = await GetApiCounterpartiesOrders(api, counterParties);
         var position = await GetApiCounterpartiesOrdersPositions(api);
-        //positions = await GetApiPositions(api, positions);
-        //positions = await GetPositionClassAsync(api);
-
+        positions = await GetApiPositions(api, positions);
 
         //остатки по складам
 
@@ -277,10 +272,11 @@ static class Program
         foreach (var order in orders)
         {
             var positions = await api.CustomerOrder.GetAsync(Guid.Parse(order.Id), query);
-            var positionsMeta = positions.Payload.Positions.Rows[0].Assortment.Meta.Href;
+            
             for (var j = 0; j < positions.Payload.Positions.Rows.Count(); j++)
             {
-                position.Id = positions.Payload.Positions.Rows[j].Id.ToString();
+                string[] positionId = positions.Payload.Positions.Rows[j].Assortment.Meta.Href.Split('/');
+                position.Id = positionId[positionId.Count()-1].ToString();
                 bool paramPosition = true;
                 using (var context = new DBSlaynTest())
                 {
@@ -297,7 +293,7 @@ static class Program
                 if (paramPosition == true)
                 {
                     var queryPositions = new AssortmentApiParameterBuilder();
-                    queryPositions.Parameter("id").Should().Be(positions.Payload.Positions.Rows[j].Id.ToString());
+                    queryPositions.Parameter("id").Should().Be(position.Id);
                     var intermediatePositions = await api.Assortment.GetAllAsync(queryPositions);
                     
                     if (intermediatePositions.Payload.Rows.Count() > 0)
@@ -336,35 +332,7 @@ static class Program
         return position;
     }
 
-    /// <summary>
-    /// Получение товаров из старых заказов
-    /// </summary>
-    /// <param name="api"></param>
-    /// <returns></returns>
-    static async Task<List<PositionClass>> GetPositionClassAsync(MoySkladApi api) 
-    {
-        List<PositionClass> positions = new List<PositionClass>();
-        PositionClass positionOldOrder = new PositionClass();
-        var query = new AssortmentApiParameterBuilder(); 
-        
-        using(var context = new DBSlaynTest())
-        {
-            foreach(var position in context.positionClass)
-            {
-                //if(position.Name== "???????")
-                positions.Add(position);
-            }
-        }
-        foreach(var position in positions)
-        {
-            query.Parameter(p => p.Id).Should().Be(Guid.Parse("f1bd5fc1-fcd4-11e6-7a69-9711000076e4"));
-            var positionOld = await api.Assortment.GetAllAsync(query);
-        }
-        return positions;
-    }
-
-
-
+ 
 
 
     //var order = "6678550908";
