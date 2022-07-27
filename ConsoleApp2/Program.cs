@@ -299,6 +299,7 @@ static class Program
                     if (intermediatePositions.Payload.Rows.Count() > 0)
                     {
                         position.Name = intermediatePositions.Payload.Rows[0].Name.ToString();
+                        position.QuantityAllStok = intermediatePositions.Payload.Rows[0].Quantity;
                         Console.WriteLine(position.Name);
                     }
                     else
