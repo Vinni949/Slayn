@@ -9,15 +9,16 @@ static class Program
     static async Task Main(string[] args)
     {
         var api = GetApiCredentials();
-        //List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
-        //List<PositionClass> positions = new List<PositionClass>();
-        //counterParties = await GetApiCounterparties(api, counterParties);
-        //var order = await GetApiCounterpartiesOrders(api, counterParties);
+        List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
+        List<PositionClass> positions = new List<PositionClass>();
+        counterParties = await GetApiCounterparties(api, counterParties);
+        var order = await GetApiCounterpartiesOrders(api, counterParties);
         var position = await GetApiCounterpartiesOrdersPositions(api);
-        //positions = await GetApiPositions(api, positions);
-
-        //остатки по складам
         
+        await GetApiPositions(api, positions,true);
+        await GetApiPositions(api, positions, false);
+        //остатки по складам
+
         Console.WriteLine("OK!");
 
     }
@@ -45,14 +46,17 @@ static class Program
     ///<summary>
     ///получение списка товаров 
     ///</summary>
-    static async Task<List<PositionClass>> GetApiPositions(MoySkladApi api, List<PositionClass> positions)
+    static async Task GetApiPositions(MoySkladApi api, List<PositionClass> positions,bool allStok)
     {
         int offset = 0;
         var query = new AssortmentApiParameterBuilder();
         var sklad = await api.Store.GetAllAsync();
         query.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/product/metadata/attributes/27fa75f7-3626-11ec-0a80-02a60003df33").Should().Be("true");
         query.Expand().With(p => p.Product).And.With(p => p.Product.SalePrices);
-        query.Parameter(p => p.StockStore).Should().Be(sklad.Payload.Rows[0].Meta);
+        if (allStok == false)
+        { 
+            query.Parameter(p => p.StockStore).Should().Be(sklad.Payload.Rows[0].Meta); 
+        }
         while (true)
         {
             query.Offset(offset);
@@ -68,7 +72,14 @@ static class Program
                 position.PriceTypes = new List<PriceTypeClass>();
                 position.Id = response.Payload.Rows[i].Id.ToString();
                 position.Name = response.Payload.Rows[i].Name.ToString();
-
+                if (allStok == true)
+                {
+                    position.QuantityAllStok = response.Payload.Rows[i].Quantity;
+                }
+                else
+                {
+                    position.QuantityStock = response.Payload.Rows[i].Quantity;
+                }
                 //надо получить комплекты await api.Bundle.Equals();
 
                 if (response.Payload.Rows[i].Product.ToString() == "Confiti.MoySklad.Remap.Entities.Product")
@@ -95,7 +106,11 @@ static class Program
                     {
                         param.Name = position.Name;
                         param.PriceTypes = position.PriceTypes;
-                        param.QuantityStock = position.QuantityStock;
+                        if (allStok == true)
+                        {
+                            param.QuantityAllStok = position.QuantityAllStok;
+                        }
+                            param.QuantityStock = position.QuantityStock;
                         Console.WriteLine("Изменение");
                     }
 
@@ -115,7 +130,6 @@ static class Program
         }
 
 
-        return positions;
         Console.WriteLine("Готово");
     }
 
