@@ -1,5 +1,8 @@
 ﻿@model IEnumerable<BasketViewModel>
 
+    <form asp-action="CreateOrder" method="post">
+    <input type="submit" value="Отправить заказ"/>
+    </form>
 @foreach(var pos in Model)
 {
     <p>@pos.Name, Количество: @pos.Count</p>

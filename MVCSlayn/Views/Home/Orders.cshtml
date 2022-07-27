@@ -6,15 +6,20 @@
 }
 @foreach(var s in Model)
 {
-    <label>Select a value: </label><select id="selectvalue">
-    <option>@s.Name</option>
+    <p>
+   <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#order-@s.Id" aria-expanded="false" aria-controls="collapseExample">
+@s.Name , @s.DateСreation , @s.sum , @s.Status
+</button>
+</p>
+<div class="collapse" id="order-@s.Id">
     @foreach(var pos in s.positions)
         {
-            <option>@pos.Name @pos.OldQuantity @pos.priceOldOrder</option>
-            
+        <div class="card card-body">
+        @pos.Name @pos.OldQuantity @pos.priceOldOrder
+        </div>
         }
-    </select> 
-    <br><p1>@s.Name , @s.DateСreation , @s.sum , @s.Status</p1><br />
+</div>
+   
 }
 @if (Model.HasPreviousPage())
 {

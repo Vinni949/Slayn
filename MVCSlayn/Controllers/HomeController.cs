@@ -119,6 +119,18 @@ namespace MVCSlayn.Controllers
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
 
         }
+        /// <summary>
+        /// Создание заказа
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPost]
+        public IActionResult CreateOrder()
+        {
+            
+
+            return RedirectToAction(nameof(Privacy));
+        }
     }
     
 }

@@ -12,6 +12,7 @@ namespace Models1.Model
         public string Name { get; set; }
         public long? priceOldOrder { get; set; }
         public List<PriceTypeClass>? PriceTypes { get; set; }
+        
         public double OldQuantity { get; set; }
         public double? QuantityStock { get; set; }
         public double? QuantityAllStok { get; set; }

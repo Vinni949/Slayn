@@ -9,16 +9,15 @@ static class Program
     static async Task Main(string[] args)
     {
         var api = GetApiCredentials();
-        List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
-        List<PositionClass> positions = new List<PositionClass>();
-        counterParties = await GetApiCounterparties(api, counterParties);
-        var order = await GetApiCounterpartiesOrders(api, counterParties);
+        //List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
+        //List<PositionClass> positions = new List<PositionClass>();
+        //counterParties = await GetApiCounterparties(api, counterParties);
+        //var order = await GetApiCounterpartiesOrders(api, counterParties);
         var position = await GetApiCounterpartiesOrdersPositions(api);
-        positions = await GetApiPositions(api, positions);
+        //positions = await GetApiPositions(api, positions);
 
         //остатки по складам
-
-        var sklad = await api.Store.GetAllAsync();
+        
         Console.WriteLine("OK!");
 
     }
