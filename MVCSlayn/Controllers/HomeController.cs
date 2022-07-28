@@ -7,6 +7,10 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Confiti.MoySklad.Remap.Entities;
+using Confiti.MoySklad.Remap.Client;
+using Confiti.MoySklad.Remap.Api;
+using Confiti.MoySklad.Remap.Models;
 
 namespace MVCSlayn.Controllers
 {
@@ -125,9 +129,34 @@ namespace MVCSlayn.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpPost]
-        public IActionResult CreateOrder()
+        public async Task<IActionResult> CreateOrder()
         {
-            
+            var credentials = new MoySkladCredentials()
+            {
+                Username = "aldef@slayn",
+                Password = "12345678",
+            };
+            var httpClient = new HttpClient();
+            var api = new MoySkladApi(credentials, httpClient);
+            var sklad = await api.Organization.GetAllAsync();
+            var basketPositions = from b in dBSlaynTest.userBaskets
+                                  join p in dBSlaynTest.positionClass
+                                  on b.PositionId equals p.Id
+                                  where b.CounterPartyId == User.Identity.Name
+                                  select new BasketViewModel(b.Count, p.Name);
+            var contrs = await api.Counterparty.GetAsync(Guid.Parse(User.Identity.Name));
+            List<Assortment> positionsList = new List<Assortment>();
+
+
+            foreach (var pos in basketPositions)
+            {
+                var query = new AssortmentApiParameterBuilder();
+                query.Parameter(p => p.Name).Should().Be(pos.Name);
+                var positions = await api.Assortment.GetAllAsync();
+                positionsList.Add(positions.Payload.Rows[0]);
+            }
+            //var newOrder = new CustomerOrder() { Agent = contrs.Payload, Organization = sklad.Payload.Rows[0], Positions = { Meta = positionsList[0].Meta } };
+            //await api.CustomerOrder.CreateAsync(newOrder);
 
             return RedirectToAction(nameof(Privacy));
         }

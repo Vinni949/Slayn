@@ -12,9 +12,8 @@ static class Program
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<PositionClass> positions = new List<PositionClass>();
         counterParties = await GetApiCounterparties(api, counterParties);
-        var order = await GetApiCounterpartiesOrders(api, counterParties);
-        var position = await GetApiCounterpartiesOrdersPositions(api);
-        
+        await GetApiCounterpartiesOrders(api, counterParties);
+        await GetApiCounterpartiesOrdersPositions(api);
         await GetApiPositions(api, positions,true);
         await GetApiPositions(api, positions, false);
         //остатки по складам
@@ -198,7 +197,7 @@ static class Program
     ///<summary>
     ///получение списка заказов контрагента
     ///</summary>
-    static async Task<OrderClass> GetApiCounterpartiesOrders(MoySkladApi api, List<CounterPartyClass> counterParties)
+    static async Task GetApiCounterpartiesOrders(MoySkladApi api, List<CounterPartyClass> counterParties)
     {
         var order = new OrderClass();
         
@@ -246,7 +245,6 @@ static class Program
                 offset += 1000;
             }
         }
-        return order;
     }
 
     /// <summary>
@@ -255,22 +253,9 @@ static class Program
     /// <param name="api"></param>
     /// <param name="counterParties"></param>
     /// <returns></returns>
-    static async Task<PositionClass> GetApiCounterpartiesOrdersPositions(MoySkladApi api)
+    static async Task GetApiCounterpartiesOrdersPositions(MoySkladApi api)
     {
-        using (var context = new DBSlaynTest())
-        {
-            foreach (var a in context.priceTypeClass)
-            { context.priceTypeClass.Remove(a); }
-            context.SaveChanges();
-        }
-        using (var context = new DBSlaynTest())
-        {
-            foreach (var a in context.positionClass)
-            { context.positionClass.Remove(a); }
-            context.SaveChanges();
-        }
         var position = new PositionClass();
-
         int offset = 0;
         var query = new ApiParameterBuilder<CustomerOrderQuery>();
         query.Expand().With(p => p.Positions);
@@ -343,7 +328,6 @@ static class Program
         }
 
 
-        return position;
     }
 
  
