@@ -22,6 +22,26 @@ namespace Models1.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("Models1.Model.AssortmentClass", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("QuantityAllStok")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("QuantityStock")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("assortmentClass");
+                });
+
             modelBuilder.Entity("Models1.Model.CounterPartyClass", b =>
                 {
                     b.Property<string>("Id")
@@ -96,12 +116,6 @@ namespace Models1.Migrations
                     b.Property<string>("OrderClassId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<double?>("QuantityAllStok")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("QuantityStock")
-                        .HasColumnType("float");
-
                     b.Property<long?>("priceOldOrder")
                         .HasColumnType("bigint");
 
@@ -120,7 +134,7 @@ namespace Models1.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"), 1L, 1);
 
-                    b.Property<string>("PositionClassId")
+                    b.Property<string>("AssortmentClassId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("name")
@@ -132,7 +146,7 @@ namespace Models1.Migrations
 
                     b.HasKey("id");
 
-                    b.HasIndex("PositionClassId");
+                    b.HasIndex("AssortmentClassId");
 
                     b.ToTable("priceTypeClass");
                 });
@@ -183,9 +197,9 @@ namespace Models1.Migrations
 
             modelBuilder.Entity("Models1.Model.PriceTypeClass", b =>
                 {
-                    b.HasOne("Models1.Model.PositionClass", null)
+                    b.HasOne("Models1.Model.AssortmentClass", null)
                         .WithMany("PriceTypes")
-                        .HasForeignKey("PositionClassId");
+                        .HasForeignKey("AssortmentClassId");
                 });
 
             modelBuilder.Entity("Models1.Model.UserBasket", b =>
@@ -207,6 +221,11 @@ namespace Models1.Migrations
                     b.Navigation("Position");
                 });
 
+            modelBuilder.Entity("Models1.Model.AssortmentClass", b =>
+                {
+                    b.Navigation("PriceTypes");
+                });
+
             modelBuilder.Entity("Models1.Model.CounterPartyClass", b =>
                 {
                     b.Navigation("Basket");
@@ -217,11 +236,6 @@ namespace Models1.Migrations
             modelBuilder.Entity("Models1.Model.OrderClass", b =>
                 {
                     b.Navigation("positions");
-                });
-
-            modelBuilder.Entity("Models1.Model.PositionClass", b =>
-                {
-                    b.Navigation("PriceTypes");
                 });
 #pragma warning restore 612, 618
         }

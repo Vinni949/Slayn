@@ -1,20 +1,45 @@
 ﻿@using Models1.Model;
 
 
-@model PagedList<PositionClass>
+@model PagedList<AssortmentClass>
 @{
 }
     <a asp-action="Basket"><button>Оформить</button></a>
     <br />
 
+    <div class="container text-center">
+  <div class="row align-items-start">
+    <div class="col">
+наименование    </div>
+    <div class="col">
+наличие    </div>
+    <div class="col">
+на удаленном складе    </div>
+ <div class="col">
+цена    </div>
+<div class="col">
+       </div>
+  </div>
+  </div>
 @foreach(var s in Model)
 {
-    <span>@s.Name</span>
+  <div class="row align-items-center">
+    <div class="col">
+     <span>@s.Name</span>
+    </div>
+    <div class="col">
+        <span>@s.QuantityStock</span>
+    </div>
+     <div class="col">
+        <span>@s.QuantityAllStok</span>
+    </div>
+     <div class="col">
     <form asp-action="AddToBasket" method="post">
         <input type="hidden" value="@s.Id" name="id"/>
         <input type="hidden" value="@Model.CurrentPage" asp-for="@Model.CurrentPage"/>
     <input type="submit" value="+"/>
     </form>
+    </div></div>
      <br />
 }
 @if (Model.HasPreviousPage())

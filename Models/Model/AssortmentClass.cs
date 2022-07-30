@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Models1.Model
 {
-    public class PositionClass
+    public class AssortmentClass
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public long? priceOldOrder { get; set; }
-        public double OldQuantity { get; set; }
-        
+        public List<PriceTypeClass>? PriceTypes { get; set; }
+        public double? QuantityStock { get; set; }
+        public double? QuantityAllStok { get; set; }
     }
 }

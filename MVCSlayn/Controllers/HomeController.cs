@@ -65,9 +65,9 @@ namespace MVCSlayn.Controllers
         {
             int pageSize = 20;
             page = page ?? 0;
-            List<PositionClass> positions = new List<PositionClass>();
-            positions = dBSlaynTest.positionClass.Skip(pageSize * page.Value).Take(pageSize).ToList();
-            return View(new PagedList<PositionClass>(page.Value, dBSlaynTest.positionClass.Count(),positions,pageSize));
+            List<AssortmentClass> positions = new List<AssortmentClass>();
+            positions = dBSlaynTest.assortmentClass.Skip(pageSize * page.Value).Take(pageSize).ToList();
+            return View(new PagedList<AssortmentClass>(page.Value, dBSlaynTest.positionClass.Count(),positions,pageSize));
         }
         [Authorize]
         [HttpPost]

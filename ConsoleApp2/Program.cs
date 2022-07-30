@@ -8,15 +8,27 @@ static class Program
 {
     static async Task Main(string[] args)
     {
+        using (var context = new DBSlaynTest())
+        {
+            foreach (var order in context.priceTypeClass)
+            {
+                context.priceTypeClass.Remove(order);
+            }
+            foreach (var order in context.positionClass)
+            {
+                context.positionClass.Remove(order);
+            }
+            context.SaveChanges();
+        }
+        Console.WriteLine("Готово");
         var api = GetApiCredentials();
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
-        List<PositionClass> positions = new List<PositionClass>();
+        List<AssortmentClass> assortment = new List<AssortmentClass>();
         counterParties = await GetApiCounterparties(api, counterParties);
         await GetApiCounterpartiesOrders(api, counterParties);
         await GetApiCounterpartiesOrdersPositions(api);
-        await GetApiPositions(api, positions,true);
-        await GetApiPositions(api, positions, false);
-        //остатки по складам
+        await GetApiPositions(api, assortment, true);
+        await GetApiPositions(api, assortment, false);
 
         Console.WriteLine("OK!");
 
@@ -45,7 +57,7 @@ static class Program
     ///<summary>
     ///получение списка товаров 
     ///</summary>
-    static async Task GetApiPositions(MoySkladApi api, List<PositionClass> positions,bool allStok)
+    static async Task GetApiPositions(MoySkladApi api, List<AssortmentClass> positions,bool allStok)
     {
         int offset = 0;
         var query = new AssortmentApiParameterBuilder();
@@ -67,17 +79,17 @@ static class Program
             for (int i = 0; i < response.Payload.Rows.Length; i++)
             {
 
-                PositionClass position = new PositionClass();
-                position.PriceTypes = new List<PriceTypeClass>();
-                position.Id = response.Payload.Rows[i].Id.ToString();
-                position.Name = response.Payload.Rows[i].Name.ToString();
+                AssortmentClass assortment = new AssortmentClass();
+                assortment.PriceTypes = new List<PriceTypeClass>();
+                assortment.Id = response.Payload.Rows[i].Id.ToString();
+                assortment.Name = response.Payload.Rows[i].Name.ToString();
                 if (allStok == true)
                 {
-                    position.QuantityAllStok = response.Payload.Rows[i].Quantity;
+                    assortment.QuantityAllStok = response.Payload.Rows[i].Quantity;
                 }
                 else
                 {
-                    position.QuantityStock = response.Payload.Rows[i].Quantity;
+                    assortment.QuantityStock = response.Payload.Rows[i].Quantity;
                 }
                 //надо получить комплекты await api.Bundle.Equals();
 
@@ -90,32 +102,32 @@ static class Program
                         PriceTypeClass priceTypeClass = new PriceTypeClass();
                         priceTypeClass.name = positionAssortment.Payload.SalePrices[a].PriceType.Name.ToString();
                         priceTypeClass.price = Convert.ToDecimal(positionAssortment.Payload.SalePrices[a].Value / 100);
-                        position.PriceTypes.Add(priceTypeClass);
+                        assortment.PriceTypes.Add(priceTypeClass);
 
                     }
                 }
                 else
-                    Console.WriteLine(position.Id + "\t" + position.Name + "Не подгружен!!!");
-                positions.Add(position);
+                    Console.WriteLine(assortment.Id + "\t" + assortment.Name + "Не подгружен!!!");
+                positions.Add(assortment);
                 using (var context = new DBSlaynTest())
                 {
 
-                    var param = context.positionClass.ToList().FirstOrDefault(p => p.Id == position.Id);
+                    var param = context.assortmentClass.ToList().FirstOrDefault(p => p.Id == assortment.Id);
                     if (param != null)
                     {
-                        param.Name = position.Name;
-                        param.PriceTypes = position.PriceTypes;
+                        param.Name = assortment.Name;
+                        param.PriceTypes = assortment.PriceTypes;
                         if (allStok == true)
                         {
-                            param.QuantityAllStok = position.QuantityAllStok;
+                            param.QuantityAllStok = assortment.QuantityAllStok;
                         }
-                            param.QuantityStock = position.QuantityStock;
+                            param.QuantityStock = assortment.QuantityStock;
                         Console.WriteLine("Изменение");
                     }
 
                     else
                     {
-                        context.positionClass.Add(position);
+                        context.assortmentClass.Add(assortment);
                         Console.WriteLine("Запись");
                     }
 
@@ -297,7 +309,6 @@ static class Program
                     if (intermediatePositions.Payload.Rows.Count() > 0)
                     {
                         position.Name = intermediatePositions.Payload.Rows[0].Name.ToString();
-                        position.QuantityAllStok = intermediatePositions.Payload.Rows[0].Quantity;
                         Console.WriteLine(position.Name);
                     }
                     else

@@ -7,15 +7,15 @@
 @foreach(var s in Model)
 {
     <p>
-   <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#order-@s.Id" aria-expanded="false" aria-controls="collapseExample">
-@s.Name , @s.DateСreation , @s.sum , @s.Status
+   <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#order-@s.Id" aria-expanded="false" >
+@s.Name , @s.DateСreation , @(s.sum/100) , @s.Status
 </button>
 </p>
 <div class="collapse" id="order-@s.Id">
     @foreach(var pos in s.positions)
         {
         <div class="card card-body">
-        @pos.Name @pos.OldQuantity @pos.priceOldOrder
+        @pos.Name @pos.OldQuantity @(pos.priceOldOrder/100) руб.
         </div>
         }
 </div>
