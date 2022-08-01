@@ -65,8 +65,9 @@ namespace MVCSlayn.Controllers
         {
             int pageSize = 20;
             page = page ?? 0;
-            List<AssortmentClass> positions = new List<AssortmentClass>();
-            positions = dBSlaynTest.assortmentClass.Skip(pageSize * page.Value).Take(pageSize).ToList();
+            List<AssortmentClass> assortments = new List<AssortmentClass>();
+            var conter = dBSlaynTest.counterPartyClass.SingleOrDefault(p => p.Id == User.Identity.Name);
+            var positions = dBSlaynTest.assortmentClass.Include(p=>p.PriceTypes).Skip(pageSize * page.Value).Take(pageSize).ToList();
             return View(new PagedList<AssortmentClass>(page.Value, dBSlaynTest.positionClass.Count(),positions,pageSize));
         }
         [Authorize]

@@ -8,26 +8,25 @@ static class Program
 {
     static async Task Main(string[] args)
     {
-        using (var context = new DBSlaynTest())
-        {
-            foreach (var order in context.priceTypeClass)
-            {
-                context.priceTypeClass.Remove(order);
-            }
-            foreach (var order in context.positionClass)
-            {
-                context.positionClass.Remove(order);
-            }
-            context.SaveChanges();
-        }
-        Console.WriteLine("Готово");
+        //using (var context = new DBSlaynTest())
+        //{
+        //    foreach (var order in context.priceTypeClass)
+        //    {
+        //        context.priceTypeClass.Remove(order);
+        //    }
+        //    foreach (var order in context.positionClass)
+        //    {
+        //        context.positionClass.Remove(order);
+        //    }
+        //    context.SaveChanges();
+        //}
         var api = GetApiCredentials();
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<AssortmentClass> assortment = new List<AssortmentClass>();
-        counterParties = await GetApiCounterparties(api, counterParties);
-        await GetApiCounterpartiesOrders(api, counterParties);
-        await GetApiCounterpartiesOrdersPositions(api);
-        await GetApiPositions(api, assortment, true);
+        //counterParties = await GetApiCounterparties(api, counterParties);
+        //await GetApiCounterpartiesOrders(api, counterParties);
+        //await GetApiCounterpartiesOrdersPositions(api);
+        //await GetApiPositions(api, assortment, true);
         await GetApiPositions(api, assortment, false);
 
         Console.WriteLine("OK!");
@@ -59,7 +58,14 @@ static class Program
     ///</summary>
     static async Task GetApiPositions(MoySkladApi api, List<AssortmentClass> positions,bool allStok)
     {
-        int offset = 0;
+        using (var context = new DBSlaynTest())
+        {
+            foreach(var orders in context.priceTypeClass)
+            {
+                context.priceTypeClass.Remove(orders);
+            }
+        }
+            int offset = 0;
         var query = new AssortmentApiParameterBuilder();
         var sklad = await api.Store.GetAllAsync();
         query.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/product/metadata/attributes/27fa75f7-3626-11ec-0a80-02a60003df33").Should().Be("true");
@@ -99,11 +105,12 @@ static class Program
 
                     for (int a = 0; a < positionAssortment.Payload.SalePrices.Length; a++)
                     {
-                        PriceTypeClass priceTypeClass = new PriceTypeClass();
-                        priceTypeClass.name = positionAssortment.Payload.SalePrices[a].PriceType.Name.ToString();
-                        priceTypeClass.price = Convert.ToDecimal(positionAssortment.Payload.SalePrices[a].Value / 100);
-                        assortment.PriceTypes.Add(priceTypeClass);
-
+                       
+                            PriceTypeClass priceTypeClass = new PriceTypeClass();
+                            priceTypeClass.name = positionAssortment.Payload.SalePrices[a].PriceType.Name.ToString();
+                            priceTypeClass.price = Convert.ToDecimal(positionAssortment.Payload.SalePrices[a].Value / 100);
+                            assortment.PriceTypes.Add(priceTypeClass);
+                        
                     }
                 }
                 else
