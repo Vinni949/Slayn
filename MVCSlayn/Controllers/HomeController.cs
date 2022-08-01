@@ -68,6 +68,7 @@ namespace MVCSlayn.Controllers
             List<AssortmentClass> assortments = new List<AssortmentClass>();
             var conter = dBSlaynTest.counterPartyClass.SingleOrDefault(p => p.Id == User.Identity.Name);
             var positions = dBSlaynTest.assortmentClass.Include(p=>p.PriceTypes).Skip(pageSize * page.Value).Take(pageSize).ToList();
+            
             return View(new PagedList<AssortmentClass>(page.Value, dBSlaynTest.positionClass.Count(),positions,pageSize));
         }
         [Authorize]
