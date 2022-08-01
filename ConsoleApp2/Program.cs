@@ -64,6 +64,7 @@ static class Program
             {
                 context.priceTypeClass.Remove(orders);
             }
+            context.SaveChanges();
         }
             int offset = 0;
         var query = new AssortmentApiParameterBuilder();

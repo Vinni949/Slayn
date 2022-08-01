@@ -13,5 +13,6 @@ namespace Models1.Model
         public List<PriceTypeClass>? PriceTypes { get; set; }
         public double? QuantityStock { get; set; }
         public double? QuantityAllStok { get; set; }
+        public decimal? price { get; set; }
     }
 }
