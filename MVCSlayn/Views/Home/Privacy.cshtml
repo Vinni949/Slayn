@@ -33,6 +33,9 @@
      <div class="col">
         <span>@s.QuantityAllStok</span>
     </div>
+    <div class="col">
+        <span>@s.price</span>
+    </div>
      <div class="col">
     <form asp-action="AddToBasket" method="post">
         <input type="hidden" value="@s.Id" name="id"/>

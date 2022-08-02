@@ -12,7 +12,7 @@ namespace Models1.Model
         public string CounterPartyId { get; set; }
         public CounterPartyClass CounterParty { get; set; }
         public string PositionId { get; set; }
-        public PositionClass Position { get; set; }
+        public AssortmentClass Position { get; set; }
         public int Count { get; set; }
     }
 }

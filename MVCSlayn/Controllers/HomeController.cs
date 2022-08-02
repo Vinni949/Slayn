@@ -67,9 +67,18 @@ namespace MVCSlayn.Controllers
             page = page ?? 0;
             List<AssortmentClass> assortments = new List<AssortmentClass>();
             var conter = dBSlaynTest.counterPartyClass.SingleOrDefault(p => p.Id == User.Identity.Name);
-            var positions = dBSlaynTest.assortmentClass.Include(p=>p.PriceTypes).Skip(pageSize * page.Value).Take(pageSize).ToList();
-            
-            return View(new PagedList<AssortmentClass>(page.Value, dBSlaynTest.positionClass.Count(),positions,pageSize));
+            assortments = dBSlaynTest.assortmentClass.Include(p=>p.PriceTypes).Skip(pageSize * page.Value).Take(pageSize).ToList();
+            for(int a=0; a<assortments.Count;a++)
+            {
+                var price= assortments[a].PriceTypes.FirstOrDefault(p => p.name == conter.PriceType);
+                if (price.price != 0)
+                {
+                    assortments[a].price = price.price;
+                }
+                else
+                    assortments[a].price = assortments[a].PriceTypes[0].price;
+            }
+            return View(new PagedList<AssortmentClass>(page.Value, dBSlaynTest.assortmentClass.Count(), assortments, pageSize));
         }
         [Authorize]
         [HttpPost]
@@ -98,7 +107,7 @@ namespace MVCSlayn.Controllers
             int pageSize = 20;
             page = page ?? 0;
             var basketPositions = from b in dBSlaynTest.userBaskets
-                                  join p in dBSlaynTest.positionClass
+                                  join p in dBSlaynTest.assortmentClass
                                   on b.PositionId equals p.Id
                                   where b.CounterPartyId == User.Identity.Name
                                   select new BasketViewModel(b.Count, p.Name);
@@ -142,24 +151,25 @@ namespace MVCSlayn.Controllers
             var api = new MoySkladApi(credentials, httpClient);
             var sklad = await api.Organization.GetAllAsync();
             var basketPositions = from b in dBSlaynTest.userBaskets
-                                  join p in dBSlaynTest.positionClass
+                                  join p in dBSlaynTest.assortmentClass
                                   on b.PositionId equals p.Id
                                   where b.CounterPartyId == User.Identity.Name
                                   select new BasketViewModel(b.Count, p.Name);
             var contrs = await api.Counterparty.GetAsync(Guid.Parse(User.Identity.Name));
-            List<Assortment> positionsList = new List<Assortment>();
-
-
+            IList<Meta> customerOrderPositions = new List<Meta>();
+            var newOrder = new CustomerOrder();
             foreach (var pos in basketPositions)
             {
                 var query = new AssortmentApiParameterBuilder();
                 query.Parameter(p => p.Name).Should().Be(pos.Name);
-                var positions = await api.Assortment.GetAllAsync();
-                positionsList.Add(positions.Payload.Rows[0]);
-            }
-            //var newOrder = new CustomerOrder() { Agent = contrs.Payload, Organization = sklad.Payload.Rows[0], Positions = { Meta = positionsList[0].Meta } };
-            //await api.CustomerOrder.CreateAsync(newOrder);
+                var positions = await api.Assortment.GetAllAsync(query);
+                //newOrder = new CustomerOrder() { Agent = contrs.Payload, Organization = sklad.Payload.Rows[0], Positions = { Meta = positions.Payload.Rows[0].Meta.UuidHref } };
 
+            }
+
+
+            //await api.CustomerOrder.CreateAsync(newOrder);
+            
             return RedirectToAction(nameof(Privacy));
         }
     }

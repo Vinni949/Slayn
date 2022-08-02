@@ -23,10 +23,10 @@ static class Program
         var api = GetApiCredentials();
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<AssortmentClass> assortment = new List<AssortmentClass>();
-        //counterParties = await GetApiCounterparties(api, counterParties);
-        //await GetApiCounterpartiesOrders(api, counterParties);
-        //await GetApiCounterpartiesOrdersPositions(api);
-        //await GetApiPositions(api, assortment, true);
+        counterParties = await GetApiCounterparties(api, counterParties);
+        await GetApiCounterpartiesOrders(api, counterParties);
+        await GetApiCounterpartiesOrdersPositions(api);
+        await GetApiPositions(api, assortment, true);
         await GetApiPositions(api, assortment, false);
 
         Console.WriteLine("OK!");
