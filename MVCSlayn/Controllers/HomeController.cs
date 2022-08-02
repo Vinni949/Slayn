@@ -70,10 +70,12 @@ namespace MVCSlayn.Controllers
             assortments = dBSlaynTest.assortmentClass.Include(p=>p.PriceTypes).Skip(pageSize * page.Value).Take(pageSize).ToList();
             for(int a=0; a<assortments.Count;a++)
             {
-                var price= assortments[a].PriceTypes.FirstOrDefault(p => p.name == conter.PriceType);
-                if (price.price != 0)
+                var price= assortments[a].PriceTypes.SingleOrDefault(p => p.name == conter.PriceType);
+                if (price != null && price.price != 0)
                 {
+
                     assortments[a].price = price.price;
+
                 }
                 else
                     assortments[a].price = assortments[a].PriceTypes[0].price;
