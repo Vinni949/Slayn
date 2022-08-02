@@ -21,11 +21,11 @@ static class Program
         //    context.SaveChanges();
         //}
         var api = GetApiCredentials();
-        List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
+        //List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<AssortmentClass> assortment = new List<AssortmentClass>();
-        counterParties = await GetApiCounterparties(api, counterParties);
-        await GetApiCounterpartiesOrders(api, counterParties);
-        await GetApiCounterpartiesOrdersPositions(api);
+        //counterParties = await GetApiCounterparties(api, counterParties);
+        //await GetApiCounterpartiesOrders(api, counterParties);
+        //await GetApiCounterpartiesOrdersPositions(api);
         await GetApiPositions(api, assortment, true);
         await GetApiPositions(api, assortment, false);
 
@@ -58,14 +58,14 @@ static class Program
     ///</summary>
     static async Task GetApiPositions(MoySkladApi api, List<AssortmentClass> positions,bool allStok)
     {
-        using (var context = new DBSlaynTest())
-        {
-            foreach(var orders in context.priceTypeClass)
-            {
-                context.priceTypeClass.Remove(orders);
-            }
-            context.SaveChanges();
-        }
+        //using (var context = new DBSlaynTest())
+        //{
+        //    foreach(var orders in context.priceTypeClass)
+        //    {
+        //        context.priceTypeClass.Remove(orders);
+        //    }
+        //    context.SaveChanges();
+        //}
             int offset = 0;
         var query = new AssortmentApiParameterBuilder();
         var sklad = await api.Store.GetAllAsync();

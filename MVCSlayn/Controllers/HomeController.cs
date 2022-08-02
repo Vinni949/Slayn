@@ -11,6 +11,7 @@ using Confiti.MoySklad.Remap.Entities;
 using Confiti.MoySklad.Remap.Client;
 using Confiti.MoySklad.Remap.Api;
 using Confiti.MoySklad.Remap.Models;
+using System.Net.Mime;
 
 namespace MVCSlayn.Controllers
 {
@@ -87,7 +88,7 @@ namespace MVCSlayn.Controllers
         public IActionResult AddToBasket(string id,int currentPage)
         {
             string counterPartyId = User.Identity.Name;
-            var basketUser = dBSlaynTest.userBaskets.SingleOrDefault(p => p.CounterPartyId == counterPartyId && p.PositionId == id);
+            var basketUser = dBSlaynTest.userBaskets.SingleOrDefault(p => p.CounterPartyId == counterPartyId && p.AssortmentId == id);
             if (basketUser != null)
             {
                 basketUser.Count++;
@@ -95,7 +96,7 @@ namespace MVCSlayn.Controllers
             else
             {
                 UserBasket product = new UserBasket();
-                product.PositionId = id;
+                product.AssortmentId = id;
                 product.CounterPartyId = counterPartyId;
                 product.Count = 1;
                 dBSlaynTest.userBaskets.Add(product);
@@ -110,7 +111,7 @@ namespace MVCSlayn.Controllers
             page = page ?? 0;
             var basketPositions = from b in dBSlaynTest.userBaskets
                                   join p in dBSlaynTest.assortmentClass
-                                  on b.PositionId equals p.Id
+                                  on b.AssortmentId equals p.Id
                                   where b.CounterPartyId == User.Identity.Name
                                   select new BasketViewModel(b.Count, p.Name);
                                
@@ -152,25 +153,34 @@ namespace MVCSlayn.Controllers
             var httpClient = new HttpClient();
             var api = new MoySkladApi(credentials, httpClient);
             var sklad = await api.Organization.GetAllAsync();
-            var basketPositions = from b in dBSlaynTest.userBaskets
-                                  join p in dBSlaynTest.assortmentClass
-                                  on b.PositionId equals p.Id
-                                  where b.CounterPartyId == User.Identity.Name
-                                  select new BasketViewModel(b.Count, p.Name);
-            var contrs = await api.Counterparty.GetAsync(Guid.Parse(User.Identity.Name));
-            IList<Meta> customerOrderPositions = new List<Meta>();
-            var newOrder = new CustomerOrder();
-            foreach (var pos in basketPositions)
+            var counter = await api.Counterparty.GetAsync(Guid.Parse(User.Identity.Name));
+            var basketPositions = dBSlaynTest.userBaskets.Where(p => p.CounterPartyId == User.Identity.Name).ToList();
+            var newOrder = new CustomerOrder() { Agent = counter.Payload, Organization = sklad.Payload.Rows[0], 
+                Positions = new PagedMetaEntities<CustomerOrderPosition> {
+                    Rows=new CustomerOrderPosition[basketPositions.Count()]                    
+            } };
+            for(int i=0;i< newOrder.Positions.Rows.Length; i++)
             {
-                var query = new AssortmentApiParameterBuilder();
-                query.Parameter(p => p.Name).Should().Be(pos.Name);
-                var positions = await api.Assortment.GetAllAsync(query);
-                //newOrder = new CustomerOrder() { Agent = contrs.Payload, Organization = sklad.Payload.Rows[0], Positions = { Meta = positions.Payload.Rows[0].Meta.UuidHref } };
 
+                newOrder.Positions.Rows[i] = new CustomerOrderPosition
+                {
+                    Quantity = basketPositions[i].Count,
+                    Price = (long)basketPositions[i].Price,
+                    Assortment = new Product
+                    {
+                        Meta = new Meta
+                        {
+                            Href = "https://online.moysklad.ru/api/remap/1.2/entity/product/" + basketPositions[i].AssortmentId,
+                            MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/product/metadata",
+                            Type = EntityType.Product,
+                            MediaType = MediaTypeNames.Application.Json
+                        }
+                    }
+                };
             }
 
 
-            //await api.CustomerOrder.CreateAsync(newOrder);
+            await api.CustomerOrder.CreateAsync(newOrder);
             
             return RedirectToAction(nameof(Privacy));
         }
