@@ -4,6 +4,8 @@ using Confiti.MoySklad.Remap.Entities;
 using Confiti.MoySklad.Remap.Models;
 using Microsoft.EntityFrameworkCore;
 using Models1.Model;
+using System.Net.Mime;
+
 static class Program
 {
     static async Task Main(string[] args)
@@ -22,13 +24,14 @@ static class Program
         //}
         var api = GetApiCredentials();
         //List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
-        List<AssortmentClass> assortment = new List<AssortmentClass>();
+        //List<AssortmentClass> assortment = new List<AssortmentClass>();
         //counterParties = await GetApiCounterparties(api, counterParties);
         //await GetApiCounterpartiesOrders(api, counterParties);
         //await GetApiCounterpartiesOrdersPositions(api);
-        await GetApiPositions(api, assortment, true);
-        await GetApiPositions(api, assortment, false);
-
+        //await GetApiPositions(api, assortment, true);
+        //await GetApiPositions(api, assortment, false);
+        
+        var sklad = await api.Organization.GetAllAsync();
         Console.WriteLine("OK!");
 
     }
@@ -289,7 +292,8 @@ static class Program
         }
         foreach (var order in orders)
         {
-            var positions = await api.CustomerOrder.GetAsync(Guid.Parse(order.Id), query);
+            if(order.positions==null)
+            { var positions = await api.CustomerOrder.GetAsync(Guid.Parse(order.Id), query);
             
             for (var j = 0; j < positions.Payload.Positions.Rows.Count(); j++)
             {
@@ -308,39 +312,40 @@ static class Program
                         order.sum += order.sum+position.priceOldOrder.Value;
                     }
                 }
-                if (paramPosition == true)
-                {
-                    var queryPositions = new AssortmentApiParameterBuilder();
-                    queryPositions.Parameter("id").Should().Be(position.Id);
-                    var intermediatePositions = await api.Assortment.GetAllAsync(queryPositions);
-                    
-                    if (intermediatePositions.Payload.Rows.Count() > 0)
+                    if (paramPosition == true)
                     {
-                        position.Name = intermediatePositions.Payload.Rows[0].Name.ToString();
-                        Console.WriteLine(position.Name);
-                    }
-                    else
-                        position.Name = "???????";
-                    position.priceOldOrder = positions.Payload.Positions.Rows[j].Price.Value;
-                    position.OldQuantity = positions.Payload.Positions.Rows[j].Quantity.Value;
-                    order.sum +=positions.Payload.Positions.Rows[j].Price.Value;
-                    
-                    using (var context = new DBSlaynTest())
-                    {
-                        var param = context.orderClass.Include(p => p.positions).ToList().FirstOrDefault(p => p.Id == order.Id);
-                        param.sum=order.sum;
-                        if (param != null)
+                        var queryPositions = new AssortmentApiParameterBuilder();
+                        queryPositions.Parameter("id").Should().Be(position.Id);
+                        var intermediatePositions = await api.Assortment.GetAllAsync(queryPositions);
+
+                        if (intermediatePositions.Payload.Rows.Count() > 0)
                         {
-                            if (param.positions == null || param.positions.SingleOrDefault(p => p.Id == position.Id) == null)
-                            {
-                                param.positions.Add(position);
-                                Console.WriteLine("Добавление");
-                            }
+                            position.Name = intermediatePositions.Payload.Rows[0].Name.ToString();
+                            Console.WriteLine(position.Name);
                         }
                         else
-                            Console.WriteLine("заказа");
-                        context.SaveChanges();
+                            position.Name = "???????";
+                        position.priceOldOrder = positions.Payload.Positions.Rows[j].Price.Value;
+                        position.OldQuantity = positions.Payload.Positions.Rows[j].Quantity.Value;
+                        order.sum += positions.Payload.Positions.Rows[j].Price.Value;
 
+                        using (var context = new DBSlaynTest())
+                        {
+                            var param = context.orderClass.Include(p => p.positions).ToList().FirstOrDefault(p => p.Id == order.Id);
+                            param.sum = order.sum;
+                            if (param != null)
+                            {
+                                if (param.positions == null || param.positions.SingleOrDefault(p => p.Id == position.Id) == null)
+                                {
+                                    param.positions.Add(position);
+                                    Console.WriteLine("Добавление");
+                                }
+                            }
+                            else
+                                Console.WriteLine("заказа");
+                            context.SaveChanges();
+
+                        }
                     }
                 }
             }

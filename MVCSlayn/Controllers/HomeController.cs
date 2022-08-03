@@ -62,7 +62,7 @@ namespace MVCSlayn.Controllers
             return View(new PagedList<OrderClass>(page.Value,dBSlaynTest.orderClass.Count(),orders,pageSize));
         }
         [Authorize]
-        public IActionResult Privacy(int? page)
+        public IActionResult Privacy(int? page, string input=null)
         {
             int pageSize = 20;
             page = page ?? 0;
@@ -76,10 +76,11 @@ namespace MVCSlayn.Controllers
                 {
 
                     assortments[a].price = price.price;
-
+                    dBSlaynTest.SaveChanges();
                 }
                 else
                     assortments[a].price = assortments[a].PriceTypes[0].price;
+                dBSlaynTest.SaveChanges();
             }
             return View(new PagedList<AssortmentClass>(page.Value, dBSlaynTest.assortmentClass.Count(), assortments, pageSize));
         }
@@ -99,6 +100,7 @@ namespace MVCSlayn.Controllers
                 product.AssortmentId = id;
                 product.CounterPartyId = counterPartyId;
                 product.Count = 1;
+                product.Price = dBSlaynTest.assortmentClass.SingleOrDefault(p => p.Id == id).price;
                 dBSlaynTest.userBaskets.Add(product);
             }
             dBSlaynTest.SaveChanges();
@@ -153,9 +155,11 @@ namespace MVCSlayn.Controllers
             var httpClient = new HttpClient();
             var api = new MoySkladApi(credentials, httpClient);
             var sklad = await api.Organization.GetAllAsync();
-            var counter = await api.Counterparty.GetAsync(Guid.Parse(User.Identity.Name));
+            var query = new ApiParameterBuilder<CounterpartiesQuery>();
+            query.Parameter("id").Should().Be(User.Identity.Name);
+            var counter = await api.Counterparty.GetAllAsync(query);
             var basketPositions = dBSlaynTest.userBaskets.Where(p => p.CounterPartyId == User.Identity.Name).ToList();
-            var newOrder = new CustomerOrder() { Agent = counter.Payload, Organization = sklad.Payload.Rows[0], 
+            var newOrder = new CustomerOrder() { Agent = counter.Payload.Rows[0], Organization = sklad.Payload.Rows[2], 
                 Positions = new PagedMetaEntities<CustomerOrderPosition> {
                     Rows=new CustomerOrderPosition[basketPositions.Count()]                    
             } };
@@ -165,7 +169,7 @@ namespace MVCSlayn.Controllers
                 newOrder.Positions.Rows[i] = new CustomerOrderPosition
                 {
                     Quantity = basketPositions[i].Count,
-                    Price = (long)basketPositions[i].Price,
+                    Price = (long)basketPositions[i].Price*100,
                     Assortment = new Product
                     {
                         Meta = new Meta
@@ -178,10 +182,11 @@ namespace MVCSlayn.Controllers
                     }
                 };
             }
-
-
             await api.CustomerOrder.CreateAsync(newOrder);
-            
+            foreach(var positions in dBSlaynTest.userBaskets)
+            {
+                dBSlaynTest.userBaskets.Remove(positions);
+            }
             return RedirectToAction(nameof(Privacy));
         }
     }
