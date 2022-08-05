@@ -22,18 +22,54 @@ static class Program
         //    }
         //    context.SaveChanges();
         //}
+
         var api = GetApiCredentials();
-        //List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
-        //List<AssortmentClass> assortment = new List<AssortmentClass>();
-        //counterParties = await GetApiCounterparties(api, counterParties);
-        //await GetApiCounterpartiesOrders(api, counterParties);
+        List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
+        List<AssortmentClass> assortment = new List<AssortmentClass>();
+        counterParties = await GetApiCounterparties(api, counterParties);
+        await GetApiCounterpartiesOrders(api, counterParties);
         //await GetApiCounterpartiesOrdersPositions(api);
         //await GetApiPositions(api, assortment, true);
         //await GetApiPositions(api, assortment, false);
-        
-        var sklad = await api.Organization.GetAllAsync();
         Console.WriteLine("OK!");
+        //Возврат товара по заказу
+        string remuvePositions = "Возврат позиции 12344123";
+        CustomerOrder customerOrderRemuve = new CustomerOrder()
+        {
+            Id = Guid.Parse("38370975-1306-11ed-0a80-0e42002c39cf"),
+            Description = remuvePositions,
+            State = new State
+            {
+                Meta = new Meta
+                {
+                    Href = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84c2b-db44-11e8-9ff4-34e80016406b",
+                    MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata",
+                    Type = EntityType.State,
+                    MediaType = MediaTypeNames.Application.Json
+                }
+            }
+        };
 
+        await api.CustomerOrder.UpdateAsync(customerOrderRemuve);
+        //Рекламация по заказу
+        string reclamationPositions = "Возврат позиции 12344123";
+        CustomerOrder customerOrderReclamation = new CustomerOrder()
+        {
+            Id = Guid.Parse("38370975-1306-11ed-0a80-0e42002c39cf"),
+            Description = reclamationPositions,
+            State = new State
+            {
+                Meta = new Meta
+                {
+                    Href = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f85266-db44-11e8-9ff4-34e80016406e",
+                    MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata",
+                    Type = EntityType.State,
+                    MediaType = MediaTypeNames.Application.Json
+                }
+            }
+        };
+
+        await api.CustomerOrder.UpdateAsync(customerOrderReclamation);
     }
 
 
@@ -155,9 +191,6 @@ static class Program
         Console.WriteLine("Готово");
     }
 
-    
-
-
     ///<summary>
     ///Получение списка контрагентов
     ///</summary>
@@ -224,14 +257,14 @@ static class Program
     {
         var order = new OrderClass();
         
-        for (int conterPartiecCount = 0; conterPartiecCount < counterParties.Count; conterPartiecCount++)
+        for (int conterPartiecCount =38; conterPartiecCount < counterParties.Count; conterPartiecCount++)
         {
             int offset = 0; 
             var queryOrders = new ApiParameterBuilder<CustomerOrdersQuery>();
             DateTime date = DateTime.Now.Subtract(new TimeSpan(182, 0, 0, 0));
-            queryOrders.Parameter("deliveryPlannedMoment").Should().BeGreaterThan(date.ToString("yyyy-MM-dd hh:mm:ss"));
+            //queryOrders.Parameter("deliveryPlannedMoment").Should().BeGreaterThan(date.ToString("yyyy-MM-dd hh:mm:ss"));
             queryOrders.Parameter("agent").Should().Be(counterParties[conterPartiecCount].Meta);
-            queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
+            //queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
             while (true)
             {
                 queryOrders.Offset(offset);
@@ -246,6 +279,12 @@ static class Program
                     order.Id = orders.Payload.Rows[i].Id.ToString();
                     order.Name = orders.Payload.Rows[i].Name.ToString();
                     order.DateСreation = orders.Payload.Rows[i].DeliveryPlannedMoment.ToString();
+                    if (orders.Payload.Rows[i].State != null)
+                    {
+                        order.Status = GetState(orders.Payload.Rows[i].State.Meta.Href);
+                    }
+                    else
+                        order.Status = "Новый";
                     counterParties[conterPartiecCount].counterPartyOrders.Add(order);
                     Console.WriteLine(counterParties[conterPartiecCount].counterPartyOrders[i].Name);
                     using (var context = new DBSlaynTest())
@@ -354,34 +393,47 @@ static class Program
 
     }
 
- 
+    /// <summary>
+    /// Получение статуса заказа
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    static string GetState(string href)
+    {
+        string state="";
+        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a")
+        {
+            state = "Выполнен";
+        }
+        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84c2b-db44-11e8-9ff4-34e80016406b")
+        {
+            state = "Возврат поставщику";
+        }
+        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f840a2-db44-11e8-9ff4-34e800164066")
+        {
+            state = "Самовывоз";
+        }
+        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84e1f-db44-11e8-9ff4-34e80016406c")
+        {
+            state = "Отмена";
+        }
+        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/693013d8-4938-11e9-9ff4-34e8000cb7f9")
+        {
+            state = "дубль";
+        }
+        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/174d0743-5ed0-11ea-0a80-000f00150769")
+        {
+            state = "Отмена заявки";
+        }
+        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/dfb3d04c-1479-11eb-0a80-04dd000f981d")
+        {
+            state = "Выполнен НА";
+        }
+        if(href== "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f85266-db44-11e8-9ff4-34e80016406e")
+        {
+            state = "Рекламация";
+        }
+        return state;
+    }
 
-
-    //var order = "6678550908";
-    //var queryPositionsOrder = new AssortmentApiParameterBuilder();
-
-    //queryPositionsOrder.Parameter(p => p.Name).Should().Be(order);
-    //query.Parameter(p => p.Archived).Should().Be(true).Or.Be(false);
-    //var orderPosition = await api.Assortment.GetAllAsync(queryPositionsOrder);
-
-
-
-
-
-
-
-
-
-    //получение организаций
-
-    //var organization = await api.Organization.GetAllAsync();
-
-
-
-    //создание заказа
-
-    //var newOrder = new CustomerOrder() { Agent = contrs.Payload.Rows[0], Organization = organization.Payload.Rows[1] };
-    //await api.CustomerOrder.CreateAsync(newOrder);
-
-   
 }

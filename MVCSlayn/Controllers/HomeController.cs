@@ -62,7 +62,7 @@ namespace MVCSlayn.Controllers
             return View(new PagedList<OrderClass>(page.Value,dBSlaynTest.orderClass.Count(),orders,pageSize));
         }
         [Authorize]
-        public IActionResult Privacy(int? page, string input=null)
+        public IActionResult Privacy(int? page, string searchString = null)
         {
             int pageSize = 20;
             page = page ?? 0;
@@ -186,7 +186,9 @@ namespace MVCSlayn.Controllers
             foreach(var positions in dBSlaynTest.userBaskets)
             {
                 dBSlaynTest.userBaskets.Remove(positions);
+                
             }
+            dBSlaynTest.SaveChanges();
             return RedirectToAction(nameof(Privacy));
         }
     }
