@@ -256,15 +256,14 @@ static class Program
     static async Task GetApiCounterpartiesOrders(MoySkladApi api, List<CounterPartyClass> counterParties)
     {
         var order = new OrderClass();
-        
-        for (int conterPartiecCount =38; conterPartiecCount < counterParties.Count; conterPartiecCount++)
+        for (int conterPartiecCount =0; conterPartiecCount < counterParties.Count; conterPartiecCount++)
         {
             int offset = 0; 
             var queryOrders = new ApiParameterBuilder<CustomerOrdersQuery>();
             DateTime date = DateTime.Now.Subtract(new TimeSpan(182, 0, 0, 0));
-            //queryOrders.Parameter("deliveryPlannedMoment").Should().BeGreaterThan(date.ToString("yyyy-MM-dd hh:mm:ss"));
+            queryOrders.Parameter("deliveryPlannedMoment").Should().BeGreaterThan(date.ToString("yyyy-MM-dd hh:mm:ss"));
             queryOrders.Parameter("agent").Should().Be(counterParties[conterPartiecCount].Meta);
-            //queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
+            queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
             while (true)
             {
                 queryOrders.Offset(offset);
