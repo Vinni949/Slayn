@@ -10,66 +10,64 @@ static class Program
 {
     static async Task Main(string[] args)
     {
-        //using (var context = new DBSlaynTest())
-        //{
-        //    foreach (var order in context.priceTypeClass)
-        //    {
-        //        context.priceTypeClass.Remove(order);
-        //    }
-        //    foreach (var order in context.positionClass)
-        //    {
-        //        context.positionClass.Remove(order);
-        //    }
-        //    context.SaveChanges();
-        //}
+        
 
         var api = GetApiCredentials();
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
-        List<AssortmentClass> assortment = new List<AssortmentClass>();
+        //List<AssortmentClass> assortment = new List<AssortmentClass>();
         counterParties = await GetApiCounterparties(api, counterParties);
-        await GetApiCounterpartiesOrders(api, counterParties);
+        //await GetApiCounterpartiesOrders(api, counterParties);
         //await GetApiCounterpartiesOrdersPositions(api);
         //await GetApiPositions(api, assortment, true);
         //await GetApiPositions(api, assortment, false);
-        Console.WriteLine("OK!");
+        
+        
+        //var query = new ApiParameterBuilder<DemandQuery>();
+        //query.Expand().With(p => p.CustomerOrder);
+        //var demand = await api.Demand.GetAsync(Guid.Parse("00414852-2ed4-11eb-0a80-051f00139e1b"));
+        //var queryCustiomerOrder = new ApiParameterBuilder<CustomerOrdersQuery>();
+        //var response = await api.CustomerOrder.GetAllAsync();
         //Возврат товара по заказу
-        string remuvePositions = "Возврат позиции 12344123";
-        CustomerOrder customerOrderRemuve = new CustomerOrder()
-        {
-            Id = Guid.Parse("38370975-1306-11ed-0a80-0e42002c39cf"),
-            Description = remuvePositions,
-            State = new State
-            {
-                Meta = new Meta
-                {
-                    Href = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84c2b-db44-11e8-9ff4-34e80016406b",
-                    MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata",
-                    Type = EntityType.State,
-                    MediaType = MediaTypeNames.Application.Json
-                }
-            }
-        };
+        //string remuvePositions = "Возврат позиций: \n"+ "Матрас SkySleep KIDDY HOLL HARD 90x190x10 Детский рисунок 3456778701"+"\n"+ "Банкетка Sheffilton SHT-B4 фисташковый/золото 2347987704";
+        //CustomerOrder customerOrderRemuve = new CustomerOrder()
+        //{
+        //    Id = Guid.Parse("38370975-1306-11ed-0a80-0e42002c39cf"),
+        //    Description = remuvePositions,
+        //    State = new State
+        //    {
+        //        Meta = new Meta
+        //        {
+        //            Href = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84c2b-db44-11e8-9ff4-34e80016406b",
+        //            MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata",
+        //            Type = EntityType.State,
+        //            MediaType = MediaTypeNames.Application.Json
+        //        }
+        //    }
+        //};
+        //await api.CustomerOrder.UpdateAsync(customerOrderRemuve);
 
-        await api.CustomerOrder.UpdateAsync(customerOrderRemuve);
-        //Рекламация по заказу
-        string reclamationPositions = "Возврат позиции 12344123";
-        CustomerOrder customerOrderReclamation = new CustomerOrder()
-        {
-            Id = Guid.Parse("38370975-1306-11ed-0a80-0e42002c39cf"),
-            Description = reclamationPositions,
-            State = new State
-            {
-                Meta = new Meta
-                {
-                    Href = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f85266-db44-11e8-9ff4-34e80016406e",
-                    MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata",
-                    Type = EntityType.State,
-                    MediaType = MediaTypeNames.Application.Json
-                }
-            }
-        };
 
-        await api.CustomerOrder.UpdateAsync(customerOrderReclamation);
+        ////Рекламация по заказу
+        //string reclamationPositions = "Рекламация по заказу на позиции 12344123";
+        //CustomerOrder customerOrderReclamation = new CustomerOrder()
+        //{
+        //    Id = Guid.Parse("38370975-1306-11ed-0a80-0e42002c39cf"),
+        //    Description = reclamationPositions,
+        //    State = new State
+        //    {
+        //        Meta = new Meta
+        //        {
+        //            Href = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f85266-db44-11e8-9ff4-34e80016406e",
+        //            MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata",
+        //            Type = EntityType.State,
+        //            MediaType = MediaTypeNames.Application.Json
+        //        }
+        //    }
+        //};
+
+        //await api.CustomerOrder.UpdateAsync(customerOrderReclamation);
+        Console.WriteLine("OK!");
+
     }
 
 
@@ -97,15 +95,15 @@ static class Program
     ///</summary>
     static async Task GetApiPositions(MoySkladApi api, List<AssortmentClass> positions,bool allStok)
     {
-        //using (var context = new DBSlaynTest())
-        //{
-        //    foreach(var orders in context.priceTypeClass)
-        //    {
-        //        context.priceTypeClass.Remove(orders);
-        //    }
-        //    context.SaveChanges();
-        //}
-            int offset = 0;
+        using (var context = new DBSlaynTest())
+        {
+            foreach (var orders in context.priceTypeClass)
+            {
+                context.priceTypeClass.Remove(orders);
+            }
+            context.SaveChanges();
+        }
+        int offset = 0;
         var query = new AssortmentApiParameterBuilder();
         var sklad = await api.Store.GetAllAsync();
         query.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/product/metadata/attributes/27fa75f7-3626-11ec-0a80-02a60003df33").Should().Be("true");
@@ -186,8 +184,6 @@ static class Program
             Console.WriteLine(offset);
 
         }
-
-
         Console.WriteLine("Готово");
     }
 

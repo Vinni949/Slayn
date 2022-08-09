@@ -4,6 +4,7 @@
 @model PagedList<OrderClass>
 @{
 }
+ <form method="post">
 @foreach(var s in Model)
 {
     <p>
@@ -11,16 +12,23 @@
 @s.Name , @s.DateСreation , @(s.sum/100) , @s.Status
 </button>
 </p>
+<input type="checkbox" id="order-@s.Id" name="id"> 
 <div class="collapse" id="order-@s.Id">
     @foreach(var pos in s.positions)
         {
         <div class="card card-body">
+       
+        <input name="id" type="radio" value="name" />
         @pos.Name @pos.OldQuantity @(pos.priceOldOrder/100) руб.
         </div>
         }
 </div>
-   
 }
+<p>
+        <input type="submit" value="Отправить" />
+</p>
+</form>
+
 @if (Model.HasPreviousPage())
 {
     <a asp-action="Orders" asp-route-page="@(Model.CurrentPage-1)">
