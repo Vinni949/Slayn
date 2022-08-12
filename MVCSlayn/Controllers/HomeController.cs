@@ -19,7 +19,6 @@ namespace MVCSlayn.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly DBSlaynTest dBSlaynTest;
-        
         public HomeController(ILogger<HomeController> logger, DBSlaynTest dBSlaynTest)
         {
             _logger = logger;
@@ -62,13 +61,18 @@ namespace MVCSlayn.Controllers
             return View(new PagedList<OrderClass>(page.Value,dBSlaynTest.orderClass.Count(),orders,pageSize));
         }
         [Authorize]
-        public IActionResult Privacy(int? page, string searchString = null)
+        public async Task<IActionResult> Privacy(int? page, string searchString)
         {
             int pageSize = 20;
             page = page ?? 0;
             List<AssortmentClass> assortments = new List<AssortmentClass>();
             var conter = dBSlaynTest.counterPartyClass.SingleOrDefault(p => p.Id == User.Identity.Name);
-            assortments = dBSlaynTest.assortmentClass.Include(p=>p.PriceTypes).Skip(pageSize * page.Value).Take(pageSize).ToList();
+            assortments = dBSlaynTest.assortmentClass.Include(p => p.PriceTypes).Skip(pageSize * page.Value).Take(pageSize).ToList();
+                        
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                assortments = assortments.Where(s => s.Name.Contains(searchString)).Skip(pageSize * page.Value).Take(pageSize).ToList();
+            }
             for(int a=0; a<assortments.Count;a++)
             {
                 var price= assortments[a].PriceTypes.SingleOrDefault(p => p.name == conter.PriceType);

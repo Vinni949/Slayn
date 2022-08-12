@@ -4,7 +4,12 @@
 @model PagedList<AssortmentClass>
 @{
 }
-
+<form asp-controller="Home" asp-action="Privacy">
+    <p>
+        Наименование: <input type="text" name="SearchString" />
+        <input type="submit" value="Filter" />
+    </p>
+</form>
 <a asp-action="Basket"><button>Оформить</button></a>
 <br />
 

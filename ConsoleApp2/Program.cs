@@ -13,15 +13,15 @@ static class Program
         
 
         var api = GetApiCredentials();
-        List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
-        //List<AssortmentClass> assortment = new List<AssortmentClass>();
-        counterParties = await GetApiCounterparties(api, counterParties);
+        //List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
+        List<AssortmentClass> assortment = new List<AssortmentClass>();
+        //counterParties = await GetApiCounterparties(api, counterParties);
         //await GetApiCounterpartiesOrders(api, counterParties);
         //await GetApiCounterpartiesOrdersPositions(api);
-        //await GetApiPositions(api, assortment, true);
-        //await GetApiPositions(api, assortment, false);
-        
-        
+        await GetApiPositions(api, assortment, true);
+        await GetApiPositions(api, assortment, false);
+
+
         //var query = new ApiParameterBuilder<DemandQuery>();
         //query.Expand().With(p => p.CustomerOrder);
         //var demand = await api.Demand.GetAsync(Guid.Parse("00414852-2ed4-11eb-0a80-051f00139e1b"));
@@ -102,6 +102,17 @@ static class Program
                 context.priceTypeClass.Remove(orders);
             }
             context.SaveChanges();
+        }
+        if(allStok==true)
+        {
+            using (var context = new DBSlaynTest())
+            {
+                foreach (var assortment in context.assortmentClass)
+                {
+                    context.assortmentClass.Remove(assortment);
+                }
+                context.SaveChanges();
+            }
         }
         int offset = 0;
         var query = new AssortmentApiParameterBuilder();
@@ -259,7 +270,7 @@ static class Program
             DateTime date = DateTime.Now.Subtract(new TimeSpan(182, 0, 0, 0));
             queryOrders.Parameter("deliveryPlannedMoment").Should().BeGreaterThan(date.ToString("yyyy-MM-dd hh:mm:ss"));
             queryOrders.Parameter("agent").Should().Be(counterParties[conterPartiecCount].Meta);
-            queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
+            //queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
             while (true)
             {
                 queryOrders.Offset(offset);
