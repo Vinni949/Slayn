@@ -13,11 +13,11 @@ static class Program
 
 
         var api = GetApiCredentials();
-        //List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
-        //List<AssortmentClass> assortment = new List<AssortmentClass>();
-        //counterParties = await GetApiCounterparties(api, counterParties);
-        //await GetApiCounterpartiesOrders(api, counterParties);
-        //await GetApiCounterpartiesOrdersPositions(api);
+        List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
+        List<AssortmentClass> assortment = new List<AssortmentClass>();
+        counterParties = await GetApiCounterparties(api, counterParties);
+        await GetApiCounterpartiesOrders(api, counterParties);
+        await GetApiCounterpartiesOrdersPositions(api);
         //await GetApiPositions(api, assortment, true);
         //await GetApiPositions(api, assortment, false);
 
@@ -35,7 +35,7 @@ static class Program
         //    Agent = demand.Payload.Agent,
         //    Organization = demand.Payload.Organization,
         //    Store = demand.Payload.Store,
-            
+
         //    Positions = new PagedMetaEntities<SalesReturnPosition>()
         //    {
 
@@ -62,70 +62,26 @@ static class Program
         //};
         //await api.SalesReturn.CreateAsync(salesReturn);
 
-        TaskEntity task = new TaskEntity()
-        {
-            Assignee=new Employee
-            {
-                Meta=new Meta
-                {
-                    Href = "https://online.moysklad.ru/api/remap/1.2/entity/employee/cd721ba3-07aa-11eb-0a80-0904000641db",
-                    MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/employee/metadata",
-                    Type = EntityType.Employee,
-                    MediaType = MediaTypeNames.Application.Json
-                }
-            },
+        //TaskEntity task = new TaskEntity()
+        //{
+        //    Assignee=new Employee
+        //    {
+        //        Meta=new Meta
+        //        {
+        //            Href = "https://online.moysklad.ru/api/remap/1.2/entity/employee/cd721ba3-07aa-11eb-0a80-0904000641db",
+        //            MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/employee/metadata",
+        //            Type = EntityType.Employee,
+        //            MediaType = MediaTypeNames.Application.Json
+        //        }
+        //    },
             
-            Description = "reclamation",
-        };
-        await api.Task.CreateAsync(task);
+        //    Description = "reclamation",
+        //};
+        //await api.Task.CreateAsync(task);
 
         
 
 
-        //var query = new ApiParameterBuilder<DemandQuery>();
-        //query.Expand().With(p => p.CustomerOrder);
-        //var demand = await api.Demand.GetAsync(Guid.Parse("00414852-2ed4-11eb-0a80-051f00139e1b"));
-        //var queryCustiomerOrder = new ApiParameterBuilder<CustomerOrdersQuery>();
-        //var response = await api.CustomerOrder.GetAllAsync();
-        //Возврат товара по заказу
-        //string remuvePositions = "Возврат позиций: \n"+ "Матрас SkySleep KIDDY HOLL HARD 90x190x10 Детский рисунок 3456778701"+"\n"+ "Банкетка Sheffilton SHT-B4 фисташковый/золото 2347987704";
-        //CustomerOrder customerOrderRemuve = new CustomerOrder()
-        //{
-        //    Id = Guid.Parse("38370975-1306-11ed-0a80-0e42002c39cf"),
-        //    Description = remuvePositions,
-        //    State = new State
-        //    {
-        //        Meta = new Meta
-        //        {
-        //            Href = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84c2b-db44-11e8-9ff4-34e80016406b",
-        //            MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata",
-        //            Type = EntityType.State,
-        //            MediaType = MediaTypeNames.Application.Json
-        //        }
-        //    }
-        //};
-        //await api.CustomerOrder.UpdateAsync(customerOrderRemuve);
-
-
-        ////Рекламация по заказу
-        //string reclamationPositions = "Рекламация по заказу на позиции 12344123";
-        //CustomerOrder customerOrderReclamation = new CustomerOrder()
-        //{
-        //    Id = Guid.Parse("38370975-1306-11ed-0a80-0e42002c39cf"),
-        //    Description = reclamationPositions,
-        //    State = new State
-        //    {
-        //        Meta = new Meta
-        //        {
-        //            Href = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f85266-db44-11e8-9ff4-34e80016406e",
-        //            MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata",
-        //            Type = EntityType.State,
-        //            MediaType = MediaTypeNames.Application.Json
-        //        }
-        //    }
-        //};
-
-        //await api.CustomerOrder.UpdateAsync(customerOrderReclamation);
         Console.WriteLine("OK!");
 
     }

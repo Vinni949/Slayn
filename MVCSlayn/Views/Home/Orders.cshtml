@@ -12,13 +12,14 @@
 @s.Name , @s.DateСreation , @(s.sum/100) , @s.Status
 </button>
 </p>
-<input type="checkbox" id="order-@s.Id" name="id"> 
 <div class="collapse" id="order-@s.Id">
     @foreach(var pos in s.positions)
         {
         <div class="card card-body">
-       
-        <input name="id" type="radio" value="name" />
+                    <form asp-action="AddToBasket" method="post">
+                        <input type="hidden" value="@pos.Id" name="id" />
+                        <input type="submit" value="Возврат" />
+                    </form>
         @pos.Name @pos.OldQuantity @(pos.priceOldOrder/100) руб.
         </div>
         }

@@ -67,18 +67,19 @@ namespace MVCSlayn.Controllers
             page = page ?? 0;
             List<AssortmentClass> assortments = new List<AssortmentClass>();
             var conter = dBSlaynTest.counterPartyClass.SingleOrDefault(p => p.Id == User.Identity.Name);
-            assortments = dBSlaynTest.assortmentClass.Include(p => p.PriceTypes).Skip(pageSize * page.Value).Take(pageSize).ToList();
+            assortments = dBSlaynTest.assortmentClass.Include(p => p.PriceTypes).ToList();
                         
             if (!String.IsNullOrEmpty(searchString))
             {
-                assortments = assortments.Where(s => s.Name.Contains(searchString)).Skip(pageSize * page.Value).Take(pageSize).ToList();
+                assortments = assortments.Where(s => s.Name.ToUpper().Contains(searchString.ToUpper())).ToList();
             }
-            for(int a=0; a<assortments.Count;a++)
+            int assortmetCount = assortments.Count();
+            assortments=assortments.Skip(pageSize * page.Value).Take(pageSize).ToList();
+            for (int a=0; a<assortments.Count;a++)
             {
                 var price= assortments[a].PriceTypes.SingleOrDefault(p => p.name == conter.PriceType);
                 if (price != null && price.price != 0)
                 {
-
                     assortments[a].price = price.price;
                     dBSlaynTest.SaveChanges();
                 }
@@ -86,11 +87,12 @@ namespace MVCSlayn.Controllers
                     assortments[a].price = assortments[a].PriceTypes[0].price;
                 dBSlaynTest.SaveChanges();
             }
-            return View(new PagedList<AssortmentClass>(page.Value, dBSlaynTest.assortmentClass.Count(), assortments, pageSize));
+            ViewBag.Search = searchString;
+            return View(new PagedList<AssortmentClass>(page.Value, assortmetCount, assortments, pageSize));
         }
         [Authorize]
         [HttpPost]
-        public IActionResult AddToBasket(string id,int currentPage)
+        public IActionResult AddToBasket(string id,int currentPage,string searchString)
         {
             string counterPartyId = User.Identity.Name;
             var basketUser = dBSlaynTest.userBaskets.SingleOrDefault(p => p.CounterPartyId == counterPartyId && p.AssortmentId == id);
@@ -109,9 +111,63 @@ namespace MVCSlayn.Controllers
             }
             dBSlaynTest.SaveChanges();
 
-            return RedirectToAction(nameof(Privacy), currentPage);
+            return RedirectToAction(nameof(Privacy), new { page = currentPage, searchString = searchString });
         }
-        public IActionResult Basket(int? page)
+
+        [HttpPost]
+        public async Task<IActionResult> ReturnPositionsOrder(string id)
+        {
+            var credentials = new MoySkladCredentials()
+            {
+                Username = "aldef@slayn",
+                Password = "12345678",
+            };
+            var httpClient = new HttpClient();
+            var api = new MoySkladApi(credentials, httpClient);
+
+            var position = dBSlaynTest.positionClass.Where(p => p.Id == id);
+            var quantyDemand = new ApiParameterBuilder<DemandQuery>();
+            quantyDemand.Expand().With(p => p.Positions);
+            var demand = await api.Demand.GetAsync(Guid.Parse("87f0029e-fe93-11ec-0a80-040b00062846"), quantyDemand);
+            var quantityReturn = new ApiParameterBuilder<SalesReturnQuery>();
+            quantityReturn.Expand().With(p => p.Positions);
+            var returnDemand = await api.SalesReturn.GetAsync(Guid.Parse("a4472c90-01e4-11ed-0a80-041100104841"));
+
+            SalesReturn salesReturn = new SalesReturn()
+            {
+                Agent = demand.Payload.Agent,
+                Organization = demand.Payload.Organization,
+                Store = demand.Payload.Store,
+
+                Positions = new PagedMetaEntities<SalesReturnPosition>()
+                {
+
+                    Rows = new[]
+                    {
+                        new SalesReturnPosition
+                        {
+                            Quantity=1,
+                            Assortment=new Product
+                            {
+                                Meta=new Meta
+                                {
+                                    Href=demand.Payload.Positions.Rows[0].Assortment.Meta.Href,
+                                    MetadataHref =demand.Payload.Positions.Rows[0].Assortment.Meta.MetadataHref,
+                                    Type=EntityType.Product,
+                                    MediaType = MediaTypeNames.Application.Json
+                                }
+                            }
+                        }
+                    }
+                },
+                Demand = demand.Payload
+
+            };
+            await api.SalesReturn.CreateAsync(salesReturn);
+            return RedirectToAction(nameof(Orders));
+        }
+
+            public IActionResult Basket(int? page)
         {
             int pageSize = 20;
             page = page ?? 0;
