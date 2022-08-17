@@ -10,16 +10,76 @@ static class Program
 {
     static async Task Main(string[] args)
     {
-        
+
 
         var api = GetApiCredentials();
         //List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
-        List<AssortmentClass> assortment = new List<AssortmentClass>();
+        //List<AssortmentClass> assortment = new List<AssortmentClass>();
         //counterParties = await GetApiCounterparties(api, counterParties);
         //await GetApiCounterpartiesOrders(api, counterParties);
         //await GetApiCounterpartiesOrdersPositions(api);
-        await GetApiPositions(api, assortment, true);
-        await GetApiPositions(api, assortment, false);
+        //await GetApiPositions(api, assortment, true);
+        //await GetApiPositions(api, assortment, false);
+
+
+
+        //var quantyDemand = new ApiParameterBuilder<DemandQuery>();
+        //quantyDemand.Expand().With(p => p.Positions);
+        //var demand = await api.Demand.GetAsync(Guid.Parse("87f0029e-fe93-11ec-0a80-040b00062846"),quantyDemand);
+        //var quantityReturn = new ApiParameterBuilder<SalesReturnQuery>();
+        //quantityReturn.Expand().With(p => p.Positions);
+        //var returnDemand = await api.SalesReturn.GetAsync(Guid.Parse("a4472c90-01e4-11ed-0a80-041100104841"));
+
+        //SalesReturn salesReturn = new SalesReturn()
+        //{
+        //    Agent = demand.Payload.Agent,
+        //    Organization = demand.Payload.Organization,
+        //    Store = demand.Payload.Store,
+            
+        //    Positions = new PagedMetaEntities<SalesReturnPosition>()
+        //    {
+
+        //        Rows = new[]
+        //        {
+        //            new SalesReturnPosition
+        //            {
+        //                Quantity=1,
+        //                Assortment=new Product
+        //                {
+        //                    Meta=new Meta
+        //                    {
+        //                        Href=demand.Payload.Positions.Rows[0].Assortment.Meta.Href,
+        //                        MetadataHref =demand.Payload.Positions.Rows[0].Assortment.Meta.MetadataHref,
+        //                        Type=EntityType.Product,
+        //                        MediaType = MediaTypeNames.Application.Json
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    },
+        //    Demand = demand.Payload
+
+        //};
+        //await api.SalesReturn.CreateAsync(salesReturn);
+
+        TaskEntity task = new TaskEntity()
+        {
+            Assignee=new Employee
+            {
+                Meta=new Meta
+                {
+                    Href = "https://online.moysklad.ru/api/remap/1.2/entity/employee/cd721ba3-07aa-11eb-0a80-0904000641db",
+                    MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/employee/metadata",
+                    Type = EntityType.Employee,
+                    MediaType = MediaTypeNames.Application.Json
+                }
+            },
+            
+            Description = "reclamation",
+        };
+        await api.Task.CreateAsync(task);
+
+        
 
 
         //var query = new ApiParameterBuilder<DemandQuery>();
@@ -285,6 +345,23 @@ static class Program
                     order.Id = orders.Payload.Rows[i].Id.ToString();
                     order.Name = orders.Payload.Rows[i].Name.ToString();
                     order.DateСreation = orders.Payload.Rows[i].DeliveryPlannedMoment.ToString();
+                    if (orders.Payload.Rows[i].Demands != null)
+                    {
+                        string[] DemandId = orders.Payload.Rows[i].Demands[orders.Payload.Rows[i].Demands.Count()-1].Meta.Href.Split('/');
+                        if (DemandId[DemandId.Count() - 2] == "demand")
+                        {
+                            
+                            var demand = await api.Demand.GetAsync(Guid.Parse(DemandId[DemandId.Count() - 1]));
+                            order.DemandId = demand.Payload.Id.ToString();
+                            order.DemandName = demand.Payload.Name.ToString();
+                            if (demand.Payload.Returns!=null)
+                            { 
+                                string[] returnId = demand.Payload.Returns[0].Meta.Href.Split('/');
+                                order.Return = returnId[returnId.Count() - 1];
+                                var returnDemand = await api.SalesReturn.GetAsync(Guid.Parse(order.Return));
+                        } 
+                        }
+                    }
                     if (orders.Payload.Rows[i].State != null)
                     {
                         order.Status = GetState(orders.Payload.Rows[i].State.Meta.Href);
