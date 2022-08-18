@@ -18,7 +18,8 @@ static class Program
         //counterParties = await GetApiCounterparties(api, counterParties);
         //await GetApiCounterpartiesOrders(api, counterParties);
         //await GetApiCounterpartiesOrdersPositions(api);
-        await GetApiOrdersDemand(api);
+        //await GetApiOrdersDemand(api);
+        await GetApiSalesReturn(api);
         //await GetApiPositions(api, assortment, true);
         //await GetApiPositions(api, assortment, false);
 
@@ -416,7 +417,6 @@ static class Program
         }
     }
 
-    
     /// <summary>
     /// получение отгрузки из заказа
     /// </summary>
@@ -424,7 +424,7 @@ static class Program
     /// <returns></returns>
     static async Task GetApiOrdersDemand(MoySkladApi api)
     {
-        var demand=new DemandClass();
+        DemandClass demand=new DemandClass();
         List<OrderClass> orders = new List<OrderClass>();
         using (var context = new DBSlayn())
         {
@@ -467,6 +467,54 @@ static class Program
                 }
             }
             
+        }
+    }
+    
+    /// <summary>
+    /// Получение возвратов покупателя
+    /// </summary>
+    /// <param name="api"></param>
+    /// <returns></returns>
+    static async Task GetApiSalesReturn(MoySkladApi api)
+    {
+        SalesReturnClass salesReturn = new SalesReturnClass();
+        List<DemandClass> demands = new List<DemandClass>();  
+        using(var contex=new DBSlayn())
+        {
+            foreach(var demand in contex.demand)
+            {
+                demands.Add(demand);
+            }
+        }
+        foreach(var demand in demands)
+        {
+            if(demand.SalesReturn==null)
+            {
+                var returns= await api.Demand.GetAsync(Guid.Parse(demand.Id));
+                if(returns.Payload.Returns!=null)
+                {
+                    for(int i=0;i< returns.Payload.Returns.Count();i++)
+                    {
+                        string[] returnId = returns.Payload.Returns[i].Meta.Href.Split('/');
+                        salesReturn.Id = returnId[returnId.Count() - 1];
+                        var intermediateReturn = await api.SalesReturn.GetAsync(Guid.Parse(salesReturn.Id));
+                        salesReturn.Name = intermediateReturn.Payload.Name;
+                        salesReturn.sum = intermediateReturn.Payload.Sum.Value;
+                        using (var context = new DBSlayn())
+                        {
+                            var demandReturn=context.demand.Include(p => p.SalesReturn).ToList().FirstOrDefault(p => p.Id == demand.Id);
+                            if(demandReturn!=null)
+                            {
+                                if (demandReturn.SalesReturn == null || demandReturn.SalesReturn.SingleOrDefault(p => p.Id == salesReturn.Id) == null)
+                                {
+                                    demandReturn.SalesReturn.Add(salesReturn);
+                                    Console.WriteLine(salesReturn.Name);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
