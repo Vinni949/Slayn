@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models1.Model;
 
@@ -11,9 +12,10 @@ using Models1.Model;
 namespace Models1.Migrations
 {
     [DbContext(typeof(DBSlayn))]
-    partial class DBSlaynModelSnapshot : ModelSnapshot
+    [Migration("20220818073644_CreationOrderClass")]
+    partial class CreationOrderClass
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,6 +88,9 @@ namespace Models1.Migrations
                     b.Property<string>("OrderClassId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("SalesReturnId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
 
@@ -95,6 +100,8 @@ namespace Models1.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrderClassId");
+
+                    b.HasIndex("SalesReturnId");
 
                     b.ToTable("demand");
                 });
@@ -184,9 +191,6 @@ namespace Models1.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("DemandId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -198,8 +202,6 @@ namespace Models1.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DemandId");
 
                     b.ToTable("salesReturnClass");
                 });
@@ -240,6 +242,12 @@ namespace Models1.Migrations
                     b.HasOne("Models1.Model.OrderClass", null)
                         .WithMany("Demands")
                         .HasForeignKey("OrderClassId");
+
+                    b.HasOne("Models1.Model.SalesReturnClass", "SalesReturn")
+                        .WithMany()
+                        .HasForeignKey("SalesReturnId");
+
+                    b.Navigation("SalesReturn");
                 });
 
             modelBuilder.Entity("Models1.Model.OrderClass", b =>
@@ -263,13 +271,6 @@ namespace Models1.Migrations
                     b.HasOne("Models1.Model.AssortmentClass", null)
                         .WithMany("PriceTypes")
                         .HasForeignKey("AssortmentClassId");
-                });
-
-            modelBuilder.Entity("Models1.Model.SalesReturnClass", b =>
-                {
-                    b.HasOne("Models1.Model.Demand", null)
-                        .WithMany("SalesReturn")
-                        .HasForeignKey("DemandId");
                 });
 
             modelBuilder.Entity("Models1.Model.UserBasket", b =>
@@ -301,11 +302,6 @@ namespace Models1.Migrations
                     b.Navigation("Basket");
 
                     b.Navigation("counterPartyOrders");
-                });
-
-            modelBuilder.Entity("Models1.Model.Demand", b =>
-                {
-                    b.Navigation("SalesReturn");
                 });
 
             modelBuilder.Entity("Models1.Model.OrderClass", b =>

@@ -15,9 +15,10 @@ static class Program
         var api = GetApiCredentials();
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<AssortmentClass> assortment = new List<AssortmentClass>();
-        counterParties = await GetApiCounterparties(api, counterParties);
-        await GetApiCounterpartiesOrders(api, counterParties);
-        await GetApiCounterpartiesOrdersPositions(api);
+        //counterParties = await GetApiCounterparties(api, counterParties);
+        //await GetApiCounterpartiesOrders(api, counterParties);
+        //await GetApiCounterpartiesOrdersPositions(api);
+        await GetApiOrdersDemand(api);
         //await GetApiPositions(api, assortment, true);
         //await GetApiPositions(api, assortment, false);
 
@@ -25,7 +26,7 @@ static class Program
 
         //var quantyDemand = new ApiParameterBuilder<DemandQuery>();
         //quantyDemand.Expand().With(p => p.Positions);
-        //var demand = await api.Demand.GetAsync(Guid.Parse("87f0029e-fe93-11ec-0a80-040b00062846"),quantyDemand);
+        //var demand = await api.Demand.GetAsync(Guid.Parse("87f0029e-fe93-11ec-0a80-040b00062846"), quantyDemand);
         //var quantityReturn = new ApiParameterBuilder<SalesReturnQuery>();
         //quantityReturn.Expand().With(p => p.Positions);
         //var returnDemand = await api.SalesReturn.GetAsync(Guid.Parse("a4472c90-01e4-11ed-0a80-041100104841"));
@@ -74,12 +75,12 @@ static class Program
         //            MediaType = MediaTypeNames.Application.Json
         //        }
         //    },
-            
+
         //    Description = "reclamation",
         //};
         //await api.Task.CreateAsync(task);
 
-        
+
 
 
         Console.WriteLine("OK!");
@@ -301,15 +302,7 @@ static class Program
                     order.Id = orders.Payload.Rows[i].Id.ToString();
                     order.Name = orders.Payload.Rows[i].Name.ToString();
                     order.DateСreation = orders.Payload.Rows[i].DeliveryPlannedMoment.ToString();
-                    if (orders.Payload.Rows[i].Demands != null)
-                    {
-                        string[] DemandId = orders.Payload.Rows[i].Demands[orders.Payload.Rows[i].Demands.Count()-1].Meta.Href.Split('/');
-                        if (DemandId[DemandId.Count() - 2] == "demand")
-                        {
-                            
-                            
-                        }
-                    }
+                   
                     if (orders.Payload.Rows[i].State != null)
                     {
                         order.Status = GetState(orders.Payload.Rows[i].State.Meta.Href);
@@ -362,26 +355,27 @@ static class Program
         }
         foreach (var order in orders)
         {
-            if(order.positions==null)
-            { var positions = await api.CustomerOrder.GetAsync(Guid.Parse(order.Id), query);
-            
-            for (var j = 0; j < positions.Payload.Positions.Rows.Count(); j++)
+            if (order.positions == null)
             {
-                string[] positionId = positions.Payload.Positions.Rows[j].Assortment.Meta.Href.Split('/');
-                position.Id = positionId[positionId.Count()-1].ToString();
-                bool paramPosition = true;
-                using (var context = new DBSlayn())
+                var positions = await api.CustomerOrder.GetAsync(Guid.Parse(order.Id), query);
+
+                for (var j = 0; j < positions.Payload.Positions.Rows.Count(); j++)
                 {
-                    var posId = context.positionClass.SingleOrDefault(p => p.Id == position.Id);
-                    if(posId!=null)
+                    string[] positionId = positions.Payload.Positions.Rows[j].Assortment.Meta.Href.Split('/');
+                    position.Id = positionId[positionId.Count() - 1].ToString();
+                    bool paramPosition = true;
+                    using (var context = new DBSlayn())
                     {
-                        position.Name = posId.Name;
-                        position.priceOldOrder = posId.priceOldOrder;
-                        position.OldQuantity = posId.OldQuantity;
-                        paramPosition = false;
-                        order.sum += order.sum+position.priceOldOrder.Value;
+                        var posId = context.positionClass.SingleOrDefault(p => p.Id == position.Id);
+                        if (posId != null)
+                        {
+                            position.Name = posId.Name;
+                            position.priceOldOrder = posId.priceOldOrder;
+                            position.OldQuantity = posId.OldQuantity;
+                            paramPosition = false;
+                            order.sum += order.sum + position.priceOldOrder.Value;
+                        }
                     }
-                }
                     if (paramPosition == true)
                     {
                         var queryPositions = new AssortmentApiParameterBuilder();
@@ -420,8 +414,60 @@ static class Program
                 }
             }
         }
+    }
 
-
+    
+    /// <summary>
+    /// получение отгрузки из заказа
+    /// </summary>
+    /// <param name="api"></param>
+    /// <returns></returns>
+    static async Task GetApiOrdersDemand(MoySkladApi api)
+    {
+        var demand=new DemandClass();
+        List<OrderClass> orders = new List<OrderClass>();
+        using (var context = new DBSlayn())
+        {
+            foreach (var order in context.orderClass)
+            {
+                orders.Add(order);
+            }
+        }
+        foreach (var order in orders)
+        {
+            if (order.Demands == null)
+            {
+                var demands = await api.CustomerOrder.GetAsync(Guid.Parse(order.Id));
+                if (demands.Payload.Demands != null)
+                {
+                    
+                    for (var j = 0; j < demands.Payload.Demands.Count(); j++)
+                    {
+                        if (demands.Payload.Demands[j].Meta.MetadataHref == "https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata")
+                        {
+                            string[] demandId = demands.Payload.Demands[j].Meta.Href.Split('/');
+                            demand.Id = demandId[demandId.Count() - 1];
+                            var intermediateDemand = await api.Demand.GetAsync(Guid.Parse(demandId[demandId.Count() - 1]));
+                            demand.Name = intermediateDemand.Payload.Name;
+                            using (var context = new DBSlayn())
+                            {
+                                var orderDemand = context.orderClass.Include(p => p.Demands).ToList().FirstOrDefault(p => p.Id == order.Id);
+                                if (orderDemand != null)
+                                {
+                                    if (orderDemand.Demands == null || orderDemand.Demands.SingleOrDefault(p => p.Id == demand.Id) == null)
+                                    {
+                                        orderDemand.Demands.Add(demand);
+                                        Console.WriteLine(demand.Name);
+                                    }
+                                }
+                                context.SaveChanges();
+                            }
+                        }
+                    }
+                }
+            }
+            
+        }
     }
 
     /// <summary>

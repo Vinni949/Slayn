@@ -15,6 +15,6 @@ namespace Models1.Model
         public List<PositionClass> positions { get; set; }
         public long sum { get; set; }
         public string CounterPartyClassId { get; set; }
-        public Demand? Demand { get; set; }
+        public List<DemandClass>? Demands { get; set; }
     }
 }

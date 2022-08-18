@@ -25,7 +25,7 @@ namespace Models1.Model
         public DbSet<PriceTypeClass> priceTypeClass { get; set; }
         public DbSet<UserBasket> userBaskets { get; set; }
         public DbSet<AssortmentClass> assortmentClass { get; set; }
-        public DbSet<Demand> demand { get; set; }
+        public DbSet<DemandClass> demand { get; set; }
         public DbSet<SalesReturnClass> salesReturnClass { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Models1.Model
 {
-    public class Demand
+    public class DemandClass
     {
         public string Id { get; set; }
         public string Name { get; set; }
         public string? Status { get; set; }
         public long? sum { get; set; }
-        public SalesReturnClass? SalesReturn { get;set; }
+        public List<SalesReturnClass>? SalesReturn { get;set; }
     }
 }
