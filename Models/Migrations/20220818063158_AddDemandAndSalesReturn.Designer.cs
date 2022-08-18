@@ -12,8 +12,8 @@ using Models1.Model;
 namespace Models1.Migrations
 {
     [DbContext(typeof(DBSlayn))]
-    [Migration("20220802164541_CreatedUserBasket")]
-    partial class CreatedUserBasket
+    [Migration("20220818063158_AddDemandAndSalesReturn")]
+    partial class AddDemandAndSalesReturn
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -76,6 +76,31 @@ namespace Models1.Migrations
                     b.ToTable("counterPartyClass");
                 });
 
+            modelBuilder.Entity("Models1.Model.Demand", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SalesReturnId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("sum")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SalesReturnId");
+
+                    b.ToTable("Demand");
+                });
+
             modelBuilder.Entity("Models1.Model.OrderClass", b =>
                 {
                     b.Property<string>("Id")
@@ -88,6 +113,9 @@ namespace Models1.Migrations
                     b.Property<string>("DateСreation")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DemandIdId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -102,6 +130,8 @@ namespace Models1.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CounterPartyClassId");
+
+                    b.HasIndex("DemandIdId");
 
                     b.ToTable("orderClass");
                 });
@@ -156,6 +186,26 @@ namespace Models1.Migrations
                     b.ToTable("priceTypeClass");
                 });
 
+            modelBuilder.Entity("Models1.Model.SalesReturnClass", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("sum")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SalesReturnClass");
+                });
+
             modelBuilder.Entity("Models1.Model.UserBasket", b =>
                 {
                     b.Property<int>("Id")
@@ -187,6 +237,15 @@ namespace Models1.Migrations
                     b.ToTable("userBaskets");
                 });
 
+            modelBuilder.Entity("Models1.Model.Demand", b =>
+                {
+                    b.HasOne("Models1.Model.SalesReturnClass", "SalesReturn")
+                        .WithMany()
+                        .HasForeignKey("SalesReturnId");
+
+                    b.Navigation("SalesReturn");
+                });
+
             modelBuilder.Entity("Models1.Model.OrderClass", b =>
                 {
                     b.HasOne("Models1.Model.CounterPartyClass", null)
@@ -194,6 +253,12 @@ namespace Models1.Migrations
                         .HasForeignKey("CounterPartyClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Models1.Model.Demand", "DemandId")
+                        .WithMany()
+                        .HasForeignKey("DemandIdId");
+
+                    b.Navigation("DemandId");
                 });
 
             modelBuilder.Entity("Models1.Model.PositionClass", b =>

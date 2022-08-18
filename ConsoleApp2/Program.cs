@@ -111,7 +111,7 @@ static class Program
     ///</summary>
     static async Task GetApiPositions(MoySkladApi api, List<AssortmentClass> positions,bool allStok)
     {
-        using (var context = new DBSlaynTest())
+        using (var context = new DBSlayn())
         {
             foreach (var orders in context.priceTypeClass)
             {
@@ -121,7 +121,7 @@ static class Program
         }
         if(allStok==true)
         {
-            using (var context = new DBSlaynTest())
+            using (var context = new DBSlayn())
             {
                 foreach (var assortment in context.assortmentClass)
                 {
@@ -181,7 +181,7 @@ static class Program
                 else
                     Console.WriteLine(assortment.Id + "\t" + assortment.Name + "Не подгружен!!!");
                 positions.Add(assortment);
-                using (var context = new DBSlaynTest())
+                using (var context = new DBSlayn())
                 {
 
                     var param = context.assortmentClass.ToList().FirstOrDefault(p => p.Id == assortment.Id);
@@ -243,7 +243,7 @@ static class Program
                 counterPartyClass.counterPartyOrders = new List<OrderClass>();
                 counterPartyClass.Meta = contrs.Payload.Rows[countrPartyCount].Meta.Href;
                 counterParties.Add(counterPartyClass);
-                using (var context = new DBSlaynTest())
+                using (var context = new DBSlayn())
                 {
 
                     var param = context.counterPartyClass.SingleOrDefault(p => p.Id == counterPartyClass.Id);
@@ -307,15 +307,7 @@ static class Program
                         if (DemandId[DemandId.Count() - 2] == "demand")
                         {
                             
-                            var demand = await api.Demand.GetAsync(Guid.Parse(DemandId[DemandId.Count() - 1]));
-                            order.DemandId = demand.Payload.Id.ToString();
-                            order.DemandName = demand.Payload.Name.ToString();
-                            if (demand.Payload.Returns!=null)
-                            { 
-                                string[] returnId = demand.Payload.Returns[0].Meta.Href.Split('/');
-                                order.Return = returnId[returnId.Count() - 1];
-                                var returnDemand = await api.SalesReturn.GetAsync(Guid.Parse(order.Return));
-                        } 
+                            
                         }
                     }
                     if (orders.Payload.Rows[i].State != null)
@@ -326,7 +318,7 @@ static class Program
                         order.Status = "Новый";
                     counterParties[conterPartiecCount].counterPartyOrders.Add(order);
                     Console.WriteLine(counterParties[conterPartiecCount].counterPartyOrders[i].Name);
-                    using (var context = new DBSlaynTest())
+                    using (var context = new DBSlayn())
                     {
                         var param = context.counterPartyClass.Include(p=>p.counterPartyOrders).ToList().FirstOrDefault(p => p.Id == counterParties[conterPartiecCount].Id);
                         if (param != null)
@@ -361,7 +353,7 @@ static class Program
         var query = new ApiParameterBuilder<CustomerOrderQuery>();
         query.Expand().With(p => p.Positions);
         List<OrderClass> orders = new List<OrderClass>();
-        using (var context = new DBSlaynTest())
+        using (var context = new DBSlayn())
         {
             foreach (var order in context.orderClass)
             {
@@ -378,7 +370,7 @@ static class Program
                 string[] positionId = positions.Payload.Positions.Rows[j].Assortment.Meta.Href.Split('/');
                 position.Id = positionId[positionId.Count()-1].ToString();
                 bool paramPosition = true;
-                using (var context = new DBSlaynTest())
+                using (var context = new DBSlayn())
                 {
                     var posId = context.positionClass.SingleOrDefault(p => p.Id == position.Id);
                     if(posId!=null)
@@ -407,7 +399,7 @@ static class Program
                         position.OldQuantity = positions.Payload.Positions.Rows[j].Quantity.Value;
                         order.sum += positions.Payload.Positions.Rows[j].Price.Value;
 
-                        using (var context = new DBSlaynTest())
+                        using (var context = new DBSlayn())
                         {
                             var param = context.orderClass.Include(p => p.positions).ToList().FirstOrDefault(p => p.Id == order.Id);
                             param.sum = order.sum;

@@ -11,7 +11,7 @@ using Models1.Model;
 
 namespace Models1.Migrations
 {
-    [DbContext(typeof(DBSlaynTest))]
+    [DbContext(typeof(DBSlayn))]
     [Migration("20220802155207_AddDBAssortment")]
     partial class AddDBAssortment
     {

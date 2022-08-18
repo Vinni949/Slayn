@@ -4,7 +4,7 @@ using Models1.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<DBSlaynTest>(options =>
+builder.Services.AddDbContext<DBSlayn>(options =>
     options.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = BdSlaynTest; Trusted_Connection = True;"));
 // Add services to the container.
 builder.Services.AddControllersWithViews();

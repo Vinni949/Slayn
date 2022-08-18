@@ -11,6 +11,7 @@ namespace Models1.Model
         public string Id { get; set; }
         public string Name { get; set; }
         public string? Status { get; set; }
-        public SalesReturn? SalesReturn { get;set; }
+        public long? sum { get; set; }
+        public SalesReturnClass? SalesReturn { get;set; }
     }
 }

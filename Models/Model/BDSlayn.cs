@@ -9,13 +9,13 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace Models1.Model
 {
-    public class DBSlaynTest : DbContext
+    public class DBSlayn : DbContext
     {
-        public DBSlaynTest()
+        public DBSlayn()
         {
         }
 
-        public DBSlaynTest(DbContextOptions<DBSlaynTest> options) : base(options)
+        public DBSlayn(DbContextOptions<DBSlayn> options) : base(options)
         {
 
         }
@@ -25,9 +25,11 @@ namespace Models1.Model
         public DbSet<PriceTypeClass> priceTypeClass { get; set; }
         public DbSet<UserBasket> userBaskets { get; set; }
         public DbSet<AssortmentClass> assortmentClass { get; set; }
+        public DbSet<Demand> demand { get; set; }
+        public DbSet<SalesReturnClass> salesReturnClass { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server = (localdb)\mssqllocaldb;Database = BdSlaynTest; Trusted_Connection = True;");
+            optionsBuilder.UseSqlServer(@"Server = (localdb)\mssqllocaldb;Database = BdSlayn; Trusted_Connection = True;");
         }
 
 

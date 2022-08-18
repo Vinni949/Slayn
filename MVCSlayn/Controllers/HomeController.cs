@@ -18,11 +18,11 @@ namespace MVCSlayn.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly DBSlaynTest dBSlaynTest;
-        public HomeController(ILogger<HomeController> logger, DBSlaynTest dBSlaynTest)
+        private readonly DBSlayn DBSlayn;
+        public HomeController(ILogger<HomeController> logger, DBSlayn DBSlayn)
         {
             _logger = logger;
-            this.dBSlaynTest = dBSlaynTest;
+            this.DBSlayn = DBSlayn;
         }
 
         public IActionResult Login()
@@ -33,7 +33,7 @@ namespace MVCSlayn.Controllers
         public async Task<IActionResult> Login(LoginViewModel loginViewModel)
         {
             
-            var counterParty = dBSlaynTest.counterPartyClass.Include(p=>p.counterPartyOrders).SingleOrDefault(p=>p.LoginOfAccessToTheLC==loginViewModel.Login
+            var counterParty = DBSlayn.counterPartyClass.Include(p=>p.counterPartyOrders).SingleOrDefault(p=>p.LoginOfAccessToTheLC==loginViewModel.Login
             &&p.LoginOfPsswordToTheLC==loginViewModel.Password);
             if (counterParty != null)
             {
@@ -47,9 +47,9 @@ namespace MVCSlayn.Controllers
         public IActionResult Index()
         {
             string id = User.Identity.Name;
-            var count = dBSlaynTest.counterPartyClass.Include(p => p.counterPartyOrders).SingleOrDefault(p => p.Id == User.Identity.Name);
+            var count = DBSlayn.counterPartyClass.Include(p => p.counterPartyOrders).SingleOrDefault(p => p.Id == User.Identity.Name);
             int counorder = count.counterPartyOrders.Count;
-            return View(dBSlaynTest.counterPartyClass.SingleOrDefault(p => p.Id == id));
+            return View(DBSlayn.counterPartyClass.SingleOrDefault(p => p.Id == id));
         }
         [Authorize]
         public IActionResult Orders(int? page)
@@ -57,8 +57,8 @@ namespace MVCSlayn.Controllers
             int pageSize = 20;
             page = page ?? 0;
             List<OrderClass> orders = new List<OrderClass>();
-            orders = dBSlaynTest.orderClass.Include(p=>p.positions).Where(p=>p.CounterPartyClassId==User.Identity.Name).Skip(pageSize * page.Value).Take(pageSize).ToList();
-            return View(new PagedList<OrderClass>(page.Value,dBSlaynTest.orderClass.Count(),orders,pageSize));
+            orders = DBSlayn.orderClass.Include(p=>p.positions).Where(p=>p.CounterPartyClassId==User.Identity.Name).Skip(pageSize * page.Value).Take(pageSize).ToList();
+            return View(new PagedList<OrderClass>(page.Value,DBSlayn.orderClass.Count(),orders,pageSize));
         }
         [Authorize]
         public async Task<IActionResult> Privacy(int? page, string searchString)
@@ -66,8 +66,8 @@ namespace MVCSlayn.Controllers
             int pageSize = 20;
             page = page ?? 0;
             List<AssortmentClass> assortments = new List<AssortmentClass>();
-            var conter = dBSlaynTest.counterPartyClass.SingleOrDefault(p => p.Id == User.Identity.Name);
-            assortments = dBSlaynTest.assortmentClass.Include(p => p.PriceTypes).ToList();
+            var conter = DBSlayn.counterPartyClass.SingleOrDefault(p => p.Id == User.Identity.Name);
+            assortments = DBSlayn.assortmentClass.Include(p => p.PriceTypes).ToList();
                         
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -81,11 +81,11 @@ namespace MVCSlayn.Controllers
                 if (price != null && price.price != 0)
                 {
                     assortments[a].price = price.price;
-                    dBSlaynTest.SaveChanges();
+                    DBSlayn.SaveChanges();
                 }
                 else
                     assortments[a].price = assortments[a].PriceTypes[0].price;
-                dBSlaynTest.SaveChanges();
+                DBSlayn.SaveChanges();
             }
             ViewBag.Search = searchString;
             return View(new PagedList<AssortmentClass>(page.Value, assortmetCount, assortments, pageSize));
@@ -95,7 +95,7 @@ namespace MVCSlayn.Controllers
         public IActionResult AddToBasket(string id,int currentPage,string searchString)
         {
             string counterPartyId = User.Identity.Name;
-            var basketUser = dBSlaynTest.userBaskets.SingleOrDefault(p => p.CounterPartyId == counterPartyId && p.AssortmentId == id);
+            var basketUser = DBSlayn.userBaskets.SingleOrDefault(p => p.CounterPartyId == counterPartyId && p.AssortmentId == id);
             if (basketUser != null)
             {
                 basketUser.Count++;
@@ -106,10 +106,10 @@ namespace MVCSlayn.Controllers
                 product.AssortmentId = id;
                 product.CounterPartyId = counterPartyId;
                 product.Count = 1;
-                product.Price = dBSlaynTest.assortmentClass.SingleOrDefault(p => p.Id == id).price;
-                dBSlaynTest.userBaskets.Add(product);
+                product.Price = DBSlayn.assortmentClass.SingleOrDefault(p => p.Id == id).price;
+                DBSlayn.userBaskets.Add(product);
             }
-            dBSlaynTest.SaveChanges();
+            DBSlayn.SaveChanges();
 
             return RedirectToAction(nameof(Privacy), new { page = currentPage, searchString = searchString });
         }
@@ -125,7 +125,7 @@ namespace MVCSlayn.Controllers
             var httpClient = new HttpClient();
             var api = new MoySkladApi(credentials, httpClient);
 
-            var position = dBSlaynTest.positionClass.Where(p => p.Id == id);
+            var position = DBSlayn.positionClass.Where(p => p.Id == id);
             var quantyDemand = new ApiParameterBuilder<DemandQuery>();
             quantyDemand.Expand().With(p => p.Positions);
             var demand = await api.Demand.GetAsync(Guid.Parse("87f0029e-fe93-11ec-0a80-040b00062846"), quantyDemand);
@@ -171,8 +171,8 @@ namespace MVCSlayn.Controllers
         {
             int pageSize = 20;
             page = page ?? 0;
-            var basketPositions = from b in dBSlaynTest.userBaskets
-                                  join p in dBSlaynTest.assortmentClass
+            var basketPositions = from b in DBSlayn.userBaskets
+                                  join p in DBSlayn.assortmentClass
                                   on b.AssortmentId equals p.Id
                                   where b.CounterPartyId == User.Identity.Name
                                   select new BasketViewModel(b.Count, p.Name);
@@ -218,7 +218,7 @@ namespace MVCSlayn.Controllers
             var query = new ApiParameterBuilder<CounterpartiesQuery>();
             query.Parameter("id").Should().Be(User.Identity.Name);
             var counter = await api.Counterparty.GetAllAsync(query);
-            var basketPositions = dBSlaynTest.userBaskets.Where(p => p.CounterPartyId == User.Identity.Name).ToList();
+            var basketPositions = DBSlayn.userBaskets.Where(p => p.CounterPartyId == User.Identity.Name).ToList();
             var newOrder = new CustomerOrder() { Agent = counter.Payload.Rows[0], Organization = sklad.Payload.Rows[2], 
                 Positions = new PagedMetaEntities<CustomerOrderPosition> {
                     Rows=new CustomerOrderPosition[basketPositions.Count()]                    
@@ -243,12 +243,12 @@ namespace MVCSlayn.Controllers
                 };
             }
             await api.CustomerOrder.CreateAsync(newOrder);
-            foreach(var positions in dBSlaynTest.userBaskets)
+            foreach(var positions in DBSlayn.userBaskets)
             {
-                dBSlaynTest.userBaskets.Remove(positions);
+                DBSlayn.userBaskets.Remove(positions);
                 
             }
-            dBSlaynTest.SaveChanges();
+            DBSlayn.SaveChanges();
             return RedirectToAction(nameof(Privacy));
         }
     }
