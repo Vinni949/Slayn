@@ -4,7 +4,7 @@
 
 namespace Models1.Migrations
 {
-    public partial class editPositionClass : Migration
+    public partial class CreatedDbSet : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -15,7 +15,8 @@ namespace Models1.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     QuantityStock = table.Column<double>(type: "float", nullable: true),
-                    QuantityAllStok = table.Column<double>(type: "float", nullable: true)
+                    QuantityAllStok = table.Column<double>(type: "float", nullable: true),
+                    price = table.Column<decimal>(type: "decimal(18,2)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -39,6 +40,20 @@ namespace Models1.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "salesReturnClass",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    sum = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_salesReturnClass", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "priceTypeClass",
                 columns: table => new
                 {
@@ -59,6 +74,54 @@ namespace Models1.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "userBaskets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CounterPartyId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    AssortmentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Count = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_userBaskets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_userBaskets_assortmentClass_AssortmentId",
+                        column: x => x.AssortmentId,
+                        principalTable: "assortmentClass",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_userBaskets_counterPartyClass_CounterPartyId",
+                        column: x => x.CounterPartyId,
+                        principalTable: "counterPartyClass",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "demand",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    sum = table.Column<long>(type: "bigint", nullable: true),
+                    SalesReturnId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_demand", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_demand_salesReturnClass_SalesReturnId",
+                        column: x => x.SalesReturnId,
+                        principalTable: "salesReturnClass",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "orderClass",
                 columns: table => new
                 {
@@ -67,7 +130,8 @@ namespace Models1.Migrations
                     DateСreation = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     sum = table.Column<long>(type: "bigint", nullable: false),
-                    CounterPartyClassId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    CounterPartyClassId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    DemandId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -78,6 +142,11 @@ namespace Models1.Migrations
                         principalTable: "counterPartyClass",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_orderClass_demand_DemandId",
+                        column: x => x.DemandId,
+                        principalTable: "demand",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -100,37 +169,20 @@ namespace Models1.Migrations
                         principalColumn: "Id");
                 });
 
-            migrationBuilder.CreateTable(
-                name: "userBaskets",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CounterPartyId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    PositionId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Count = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_userBaskets", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_userBaskets_counterPartyClass_CounterPartyId",
-                        column: x => x.CounterPartyId,
-                        principalTable: "counterPartyClass",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_userBaskets_positionClass_PositionId",
-                        column: x => x.PositionId,
-                        principalTable: "positionClass",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.CreateIndex(
+                name: "IX_demand_SalesReturnId",
+                table: "demand",
+                column: "SalesReturnId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_orderClass_CounterPartyClassId",
                 table: "orderClass",
                 column: "CounterPartyClassId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_orderClass_DemandId",
+                table: "orderClass",
+                column: "DemandId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_positionClass_OrderClassId",
@@ -143,18 +195,21 @@ namespace Models1.Migrations
                 column: "AssortmentClassId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_userBaskets_AssortmentId",
+                table: "userBaskets",
+                column: "AssortmentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_userBaskets_CounterPartyId",
                 table: "userBaskets",
                 column: "CounterPartyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_userBaskets_PositionId",
-                table: "userBaskets",
-                column: "PositionId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "positionClass");
+
             migrationBuilder.DropTable(
                 name: "priceTypeClass");
 
@@ -162,16 +217,19 @@ namespace Models1.Migrations
                 name: "userBaskets");
 
             migrationBuilder.DropTable(
-                name: "assortmentClass");
-
-            migrationBuilder.DropTable(
-                name: "positionClass");
-
-            migrationBuilder.DropTable(
                 name: "orderClass");
 
             migrationBuilder.DropTable(
+                name: "assortmentClass");
+
+            migrationBuilder.DropTable(
                 name: "counterPartyClass");
+
+            migrationBuilder.DropTable(
+                name: "demand");
+
+            migrationBuilder.DropTable(
+                name: "salesReturnClass");
         }
     }
 }
