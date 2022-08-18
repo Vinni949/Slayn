@@ -500,6 +500,8 @@ static class Program
                         var intermediateReturn = await api.SalesReturn.GetAsync(Guid.Parse(salesReturn.Id));
                         salesReturn.Name = intermediateReturn.Payload.Name;
                         salesReturn.sum = intermediateReturn.Payload.Sum.Value;
+                        string[] CounterPartiesId= intermediateReturn.Payload.Agent.Meta.Href.Split('/');
+                        salesReturn.CounterPartiesId = CounterPartiesId[CounterPartiesId.Count() - 1];
                         using (var context = new DBSlayn())
                         {
                             var demandReturn=context.demand.Include(p => p.SalesReturn).ToList().FirstOrDefault(p => p.Id == demand.Id);
