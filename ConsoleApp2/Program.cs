@@ -21,24 +21,21 @@ static class Program
         await GetApiOrdersDemand(api);
         await GetApiSalesReturn(api);
         await GetApiSalesReturnPositions(api);
-        //await GetApiPositions(api, assortment, true);
-        //await GetApiPositions(api, assortment, false);
+        await GetApiPositions(api, assortment, true);
+        await GetApiPositions(api, assortment, false);
 
 
 
         //var quantyDemand = new ApiParameterBuilder<DemandQuery>();
         //quantyDemand.Expand().With(p => p.Positions);
-        //var demand = await api.Demand.GetAsync(Guid.Parse("87f0029e-fe93-11ec-0a80-040b00062846"), quantyDemand);
-        //var quantityReturn = new ApiParameterBuilder<SalesReturnQuery>();
-        //quantityReturn.Expand().With(p => p.Positions);
-        //var returnDemand = await api.SalesReturn.GetAsync(Guid.Parse("a4472c90-01e4-11ed-0a80-041100104841"));
+        //var demand = await api.Demand.GetAsync(Guid.Parse("01dc1833-a05a-11ec-0a80-02d6000b1cc1"), quantyDemand);
 
-        //SalesReturn salesReturn = new SalesReturn()
+        //var salesReturn = new SalesReturn()
         //{
         //    Agent = demand.Payload.Agent,
         //    Organization = demand.Payload.Organization,
         //    Store = demand.Payload.Store,
-
+        //    Demand = demand.Payload,
         //    Positions = new PagedMetaEntities<SalesReturnPosition>()
         //    {
 
@@ -46,26 +43,19 @@ static class Program
         //        {
         //            new SalesReturnPosition
         //            {
-        //                Quantity=1,
-        //                Assortment=new Product
-        //                {
-        //                    Meta=new Meta
-        //                    {
-        //                        Href=demand.Payload.Positions.Rows[0].Assortment.Meta.Href,
-        //                        MetadataHref =demand.Payload.Positions.Rows[0].Assortment.Meta.MetadataHref,
-        //                        Type=EntityType.Product,
-        //                        MediaType = MediaTypeNames.Application.Json
-        //                    }
-        //                }
+        //                Quantity=demand.Payload.Positions.Rows[0].Quantity,
+        //                Price=demand.Payload.Positions.Rows[0].Price,
+        //                Assortment=demand.Payload.Positions.Rows[0].Assortment
         //            }
         //        }
-        //    },
-        //    Demand = demand.Payload
+        //    }
+
 
         //};
-        //await api.SalesReturn.CreateAsync(salesReturn);
+        //var sales=await api.SalesReturn.CreateAsync(salesReturn);
 
-        
+
+
 
 
 
@@ -571,6 +561,7 @@ static class Program
                             var param = context.salesReturnClass.Include(p => p.SalesReturnPositions).ToList().FirstOrDefault(p => p.Id == order.Id);
                             if (param != null)
                             {
+                                
                                 if (param.SalesReturnPositions == null || param.SalesReturnPositions.SingleOrDefault(p => p.Id == salesReturnPositions.Id) == null)
                                 {
                                     param.SalesReturnPositions.Add(salesReturnPositions);

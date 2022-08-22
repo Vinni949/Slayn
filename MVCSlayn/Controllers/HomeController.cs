@@ -166,18 +166,24 @@ namespace MVCSlayn.Controllers
             };
             var httpClient = new HttpClient();
             var api = new MoySkladApi(credentials, httpClient);
-
-            var position = DBSlayn.positionClass.Where(p => p.Id == id);
             var quantyDemand = new ApiParameterBuilder<DemandQuery>();
             quantyDemand.Expand().With(p => p.Positions);
             var demand = await api.Demand.GetAsync(Guid.Parse(posId), quantyDemand);
-            
+            var interPos = demand.Payload.Positions.Rows[0];
+            foreach(var pos in demand.Payload.Positions.Rows)
+            {
+                string[] interPosID = pos.Assortment.Meta.Href.Split("/");
+                if (interPosID[interPosID.Count()-1]==id)
+                {
+                    interPos = pos;
+                }
+            }
             SalesReturn salesReturn = new SalesReturn()
             {
                 Agent = demand.Payload.Agent,
                 Organization = demand.Payload.Organization,
                 Store = demand.Payload.Store,
-
+                Demand = demand.Payload,
                 Positions = new PagedMetaEntities<SalesReturnPosition>()
                 {
 
@@ -186,23 +192,15 @@ namespace MVCSlayn.Controllers
                         new SalesReturnPosition
                         {
                             Quantity=1,
-                            Assortment=new Product
-                            {
-                                Meta=new Meta
-                                {
-                                    Href=demand.Payload.Positions.Rows[0].Assortment.Meta.Href,
-                                    MetadataHref =demand.Payload.Positions.Rows[0].Assortment.Meta.MetadataHref,
-                                    Type=EntityType.Product,
-                                    MediaType = MediaTypeNames.Application.Json
-                                }
-                            }
+                            Price=interPos.Price,
+                            Assortment=interPos.Assortment
                         }
                     }
-                },
-                Demand = demand.Payload
+                }
+                
 
             };
-            await api.SalesReturn.CreateAsync(salesReturn);
+            var salesReturnResponse=await api.SalesReturn.CreateAsync(salesReturn);
             return RedirectToAction(nameof(Orders));
         }
 
