@@ -1,0 +1,42 @@
+﻿@using Models1.Model;
+
+
+@model PagedList<SalesReturnClass>
+@{
+}
+ <form method="post" collor="#FFFFFF" >
+@foreach(var s in Model)
+{
+    <p>
+   <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#order-@s.Id" aria-expanded="false">
+@s.Name , @(s.sum/100) , @s.Status
+</button>
+</p>
+<div class="collapse" id="order-@s.Id">
+    @foreach(var pos in s.SalesReturnPositions)
+        {
+        <div class="card card-body">
+                   
+        @pos.Name @pos.OldQuantity @(pos.priceOldOrder/100) руб.
+        </div>
+        }
+</div>
+}
+</form>
+
+@if (Model.HasPreviousPage())
+{
+    <a asp-action="Orders" asp-route-page="@(Model.CurrentPage-1)">
+        <button>
+        назад
+        </button>
+        </a>
+}
+@if (Model.HasNextPage())
+{
+    <a asp-action="Orders" asp-route-page="@(Model.CurrentPage+1)">
+        <button>
+        вперед
+        </button>
+        </a>
+}

@@ -61,6 +61,15 @@ namespace MVCSlayn.Controllers
             return View(new PagedList<OrderClass>(page.Value,DBSlayn.orderClass.Count(),orders,pageSize));
         }
         [Authorize]
+        public IActionResult Return(int? page)
+        {
+            int pageSize = 20;
+            page = page ?? 0;
+            List<SalesReturnClass> salesReturns = new List<SalesReturnClass>();
+            salesReturns = DBSlayn.salesReturnClass.Include(p => p.SalesReturnPositions).Where(p => p.CounterPartiesId == User.Identity.Name).Skip(pageSize * page.Value).Take(pageSize).ToList();
+            return View(new PagedList<SalesReturnClass>(page.Value, DBSlayn.orderClass.Count(), salesReturns, pageSize));
+        }
+        [Authorize]
         public async Task<IActionResult> Privacy(int? page, string searchString)
         {
             int pageSize = 20;
