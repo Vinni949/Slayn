@@ -65,22 +65,7 @@ static class Program
         //};
         //await api.SalesReturn.CreateAsync(salesReturn);
 
-        //TaskEntity task = new TaskEntity()
-        //{
-        //    Assignee=new Employee
-        //    {
-        //        Meta=new Meta
-        //        {
-        //            Href = "https://online.moysklad.ru/api/remap/1.2/entity/employee/cd721ba3-07aa-11eb-0a80-0904000641db",
-        //            MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/employee/metadata",
-        //            Type = EntityType.Employee,
-        //            MediaType = MediaTypeNames.Application.Json
-        //        }
-        //    },
-
-        //    Description = "reclamation",
-        //};
-        //await api.Task.CreateAsync(task);
+        
 
 
 

@@ -123,7 +123,40 @@ namespace MVCSlayn.Controllers
             return RedirectToAction(nameof(Privacy), new { page = currentPage, searchString = searchString });
         }
 
-        [HttpPost]
+        public async Task<IActionResult> AddTask(string posId, string id)
+        {
+            return RedirectToAction(nameof(Task),posId,id);
+        }
+
+            [HttpPost]
+        public async Task<IActionResult> Task(string posId, string id,string massage,string post)
+        {
+            var credentials = new MoySkladCredentials()
+            {
+                Username = "aldef@slayn",
+                Password = "12345678",
+            };
+            var httpClient = new HttpClient();
+            var api = new MoySkladApi(credentials, httpClient);
+            TaskEntity task = new TaskEntity()
+            {
+                Assignee = new Employee
+                {
+                    Meta = new Meta
+                    {
+                        Href = "https://online.moysklad.ru/api/remap/1.2/entity/employee/cd721ba3-07aa-11eb-0a80-0904000641db",
+                        MetadataHref = "https://online.moysklad.ru/api/remap/1.2/entity/employee/metadata",
+                        Type = EntityType.Employee,
+                        MediaType = MediaTypeNames.Application.Json
+                    }
+                },
+
+                Description ="заказ: "+posId+", позиция:  "+id +", Суть рекламации: "+massage+", почта для обратной связи: "+post,
+            };
+            await api.Task.CreateAsync(task);
+            return RedirectToAction(nameof(Orders));
+        }
+            [HttpPost]
         public async Task<IActionResult> ReturnPositionsOrder(string posId,string id)
         {
             var credentials = new MoySkladCredentials()
@@ -173,7 +206,7 @@ namespace MVCSlayn.Controllers
             return RedirectToAction(nameof(Orders));
         }
 
-            public IActionResult Basket(int? page)
+        public IActionResult Basket(int? page)
         {
             int pageSize = 20;
             page = page ?? 0;
