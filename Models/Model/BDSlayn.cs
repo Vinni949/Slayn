@@ -27,6 +27,7 @@ namespace Models1.Model
         public DbSet<AssortmentClass> assortmentClass { get; set; }
         public DbSet<DemandClass> demand { get; set; }
         public DbSet<SalesReturnClass> salesReturnClass { get; set; }
+        public DbSet<SalesReturnPositionsClass> salesReturnPositionsClass { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(@"Server = (localdb)\mssqllocaldb;Database = BdSlayn; Trusted_Connection = True;");

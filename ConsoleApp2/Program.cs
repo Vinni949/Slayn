@@ -15,11 +15,12 @@ static class Program
         var api = GetApiCredentials();
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<AssortmentClass> assortment = new List<AssortmentClass>();
-        //counterParties = await GetApiCounterparties(api, counterParties);
-        //await GetApiCounterpartiesOrders(api, counterParties);
-        //await GetApiCounterpartiesOrdersPositions(api);
-        //await GetApiOrdersDemand(api);
+        counterParties = await GetApiCounterparties(api, counterParties);
+        await GetApiCounterpartiesOrders(api, counterParties);
+        await GetApiCounterpartiesOrdersPositions(api);
+        await GetApiOrdersDemand(api);
         await GetApiSalesReturn(api);
+        await GetApiSalesReturnPositions(api);
         //await GetApiPositions(api, assortment, true);
         //await GetApiPositions(api, assortment, false);
 
@@ -513,6 +514,88 @@ static class Program
                                     Console.WriteLine(salesReturn.Name);
                                 }
                             }
+                            context.SaveChanges();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// получение позиций из возвратов
+    /// </summary>
+    /// <param name="api"></param>
+    /// <returns></returns>
+    static async Task GetApiSalesReturnPositions(MoySkladApi api)
+    {
+
+        var salesReturnPositions = new SalesReturnPositionsClass();
+        int offset = 0;
+        var query = new ApiParameterBuilder<SalesReturnQuery>();
+        query.Expand().With(p => p.Positions);
+        List<SalesReturnClass> orders = new List<SalesReturnClass>();
+        using (var context = new DBSlayn())
+        {
+            foreach (var order in context.salesReturnClass)
+            {
+                orders.Add(order);
+            }
+        }
+        foreach (var order in orders)
+        {
+            if (order.SalesReturnPositions == null)
+            {
+                var positions = await api.SalesReturn.GetAsync(Guid.Parse(order.Id), query);
+
+                for (var j = 0; j < positions.Payload.Positions.Rows.Count(); j++)
+                {
+                    string[] positionId = positions.Payload.Positions.Rows[j].Assortment.Meta.Href.Split('/');
+                    salesReturnPositions.Id = positionId[positionId.Count() - 1].ToString();
+                    bool paramPosition = true;
+                    using (var context = new DBSlayn())
+                    {
+                        var posId = context.salesReturnPositionsClass.SingleOrDefault(p => p.Id == salesReturnPositions.Id);
+                        if (posId != null)
+                        {
+                            salesReturnPositions.Name = posId.Name;
+                            salesReturnPositions.priceOldOrder = posId.priceOldOrder;
+                            salesReturnPositions.OldQuantity = posId.OldQuantity;
+                            paramPosition = false;
+                        }
+                    }
+                    if (paramPosition == true)
+                    {
+                        var queryPositions = new AssortmentApiParameterBuilder();
+                        queryPositions.Parameter("id").Should().Be(salesReturnPositions.Id);
+                        var intermediatePositions = await api.Assortment.GetAllAsync(queryPositions);
+
+                        if (intermediatePositions.Payload.Rows.Count() > 0)
+                        {
+                            salesReturnPositions.Name = intermediatePositions.Payload.Rows[0].Name.ToString();
+                            Console.WriteLine(salesReturnPositions.Name);
+                        }
+                        else
+                            salesReturnPositions.Name = "???????";
+                        salesReturnPositions.priceOldOrder = positions.Payload.Positions.Rows[j].Price.Value;
+                        salesReturnPositions.OldQuantity = positions.Payload.Positions.Rows[j].Quantity.Value;
+                        order.sum += positions.Payload.Positions.Rows[j].Price.Value;
+
+                        using (var context = new DBSlayn())
+                        {
+                            var param = context.salesReturnClass.Include(p => p.SalesReturnPositions).ToList().FirstOrDefault(p => p.Id == order.Id);
+                            if (param != null)
+                            {
+                                if (param.SalesReturnPositions == null || param.SalesReturnPositions.SingleOrDefault(p => p.Id == salesReturnPositions.Id) == null)
+                                {
+                                    param.SalesReturnPositions.Add(salesReturnPositions);
+                                    Console.WriteLine("Добавление");
+                                }
+                            }
+                            else
+                                Console.WriteLine("заказа");
+                            context.SaveChanges();
+
                         }
                     }
                 }

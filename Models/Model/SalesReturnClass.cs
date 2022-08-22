@@ -13,6 +13,6 @@ namespace Models1.Model
         public string? Status { get; set; }
         public long sum { get; set; }
         public string CounterPartiesId { get; set; }
-        public SalesReturnPositionsClass SalesReturnPositions { get; set; }
+        public List<SalesReturnPositionsClass>? SalesReturnPositions { get; set; }
     }
 }
