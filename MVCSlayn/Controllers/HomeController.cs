@@ -124,7 +124,7 @@ namespace MVCSlayn.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ReturnPositionsOrder(string id)
+        public async Task<IActionResult> ReturnPositionsOrder(string posId,string id)
         {
             var credentials = new MoySkladCredentials()
             {
@@ -137,11 +137,8 @@ namespace MVCSlayn.Controllers
             var position = DBSlayn.positionClass.Where(p => p.Id == id);
             var quantyDemand = new ApiParameterBuilder<DemandQuery>();
             quantyDemand.Expand().With(p => p.Positions);
-            var demand = await api.Demand.GetAsync(Guid.Parse("87f0029e-fe93-11ec-0a80-040b00062846"), quantyDemand);
-            var quantityReturn = new ApiParameterBuilder<SalesReturnQuery>();
-            quantityReturn.Expand().With(p => p.Positions);
-            var returnDemand = await api.SalesReturn.GetAsync(Guid.Parse("a4472c90-01e4-11ed-0a80-041100104841"));
-
+            var demand = await api.Demand.GetAsync(Guid.Parse(posId), quantyDemand);
+            
             SalesReturn salesReturn = new SalesReturn()
             {
                 Agent = demand.Payload.Agent,

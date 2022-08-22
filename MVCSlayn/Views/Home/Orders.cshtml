@@ -17,6 +17,7 @@
         {
         <div class="card card-body">
                     <form asp-action="AddToBasket" method="post">
+                        <input type="hidden" value="@s.Id" name="posId" />
                         <input type="hidden" value="@pos.Id" name="id" />
                         <input type="submit" value="Возврат" />
                     </form>
