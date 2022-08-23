@@ -29,6 +29,7 @@ namespace MVCSlayn.Controllers
         {
             return View();
         }
+      
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel loginViewModel)
         {
@@ -43,6 +44,7 @@ namespace MVCSlayn.Controllers
             else
                 return View(loginViewModel);
         }
+       
         [Authorize]
         public IActionResult Index()
         {
@@ -51,6 +53,7 @@ namespace MVCSlayn.Controllers
             int counorder = count.counterPartyOrders.Count;
             return View(DBSlayn.counterPartyClass.SingleOrDefault(p => p.Id == id));
         }
+      
         [Authorize]
         public IActionResult Orders(int? page)
         {
@@ -99,6 +102,7 @@ namespace MVCSlayn.Controllers
             ViewBag.Search = searchString;
             return View(new PagedList<AssortmentClass>(page.Value, assortmetCount, assortments, pageSize));
         }
+        
         [Authorize]
         [HttpPost]
         public IActionResult AddToBasket(string id,int currentPage,string searchString)
@@ -122,16 +126,16 @@ namespace MVCSlayn.Controllers
 
             return RedirectToAction(nameof(Privacy), new { page = currentPage, searchString = searchString });
         }
-        [HttpPost]
-
-        public async Task<IActionResult> AddTask(string posId, string id)
+        public IActionResult Task()
         {
-            return RedirectToAction(nameof(Task),posId,id);
+            return View();
         }
 
-            [HttpPost]
-        public async Task<IActionResult> Task(string posId, string id,string massage,string post)
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> Task(TaskViewModel taskViewModel)
         {
+            string description = "заказ: " + taskViewModel.OrderName + ", позиция:  " + taskViewModel.PositionName + ", Суть рекламации: " + taskViewModel.Massage + ", почта для обратной связи: " + taskViewModel.Post;
             var credentials = new MoySkladCredentials()
             {
                 Username = "aldef@slayn",
@@ -152,10 +156,10 @@ namespace MVCSlayn.Controllers
                     }
                 },
 
-                Description ="заказ: "+posId+", позиция:  "+id +", Суть рекламации: "+massage+", почта для обратной связи: "+post,
+                Description = description
             };
             await api.Task.CreateAsync(task);
-            return RedirectToAction(nameof(Orders));
+            return View(taskViewModel);
         }
         [HttpPost]
         public async Task<IActionResult> ReturnPositionsOrder(string posId, string id)
@@ -214,7 +218,6 @@ namespace MVCSlayn.Controllers
             return RedirectToAction(nameof(Orders));
         }
         
-
         public IActionResult Basket(int? page)
         {
             int pageSize = 20;

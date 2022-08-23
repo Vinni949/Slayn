@@ -21,11 +21,7 @@
                         <input type="hidden" value="@pos.Id" name="id" />
                         <input type="submit" value="Возврат" />
                     </form>
-                    <form asp-action="AddTask" method="post">
-                        <input type="hidden" value="@s.Id" name="posId" />
-                        <input type="hidden" value="@pos.Id" name="id" />
-                        <input type="submit" value="Отправить рекламацию" />
-                    </form>
+                    
         @pos.Name @pos.OldQuantity @(pos.priceOldOrder/100) руб.
         </div>
         }
