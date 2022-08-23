@@ -186,6 +186,7 @@ namespace MVCSlayn.Controllers
                             Organization = demand.Payload.Organization,
                             Store = demand.Payload.Store,
                             Demand = demand.Payload,
+                            
                             Applicable=false,
                             Positions = new PagedMetaEntities<SalesReturnPosition>()
                             {
@@ -194,9 +195,11 @@ namespace MVCSlayn.Controllers
                                 {
                                     new SalesReturnPosition
                                     {
-                                        Quantity=demand.Payload.Positions.Rows[0].Quantity,
-                                        Price=demand.Payload.Positions.Rows[0].Price,
-                                        Assortment=demand.Payload.Positions.Rows[0].Assortment
+                                        Quantity=pos.Quantity,
+                                        Price=pos.Price,
+                                        Assortment=pos.Assortment,
+                                        Vat=pos.Vat
+
                                     }
                                 }
                             }
