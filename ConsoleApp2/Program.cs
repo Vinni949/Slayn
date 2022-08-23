@@ -13,46 +13,46 @@ static class Program
 
 
         var api = GetApiCredentials();
-        List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
-        List<AssortmentClass> assortment = new List<AssortmentClass>();
-        counterParties = await GetApiCounterparties(api, counterParties);
-        await GetApiCounterpartiesOrders(api, counterParties);
-        await GetApiCounterpartiesOrdersPositions(api);
-        await GetApiOrdersDemand(api);
+        //List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
+        //List<AssortmentClass> assortment = new List<AssortmentClass>();
+        //counterParties = await GetApiCounterparties(api, counterParties);
+        //await GetApiCounterpartiesOrders(api, counterParties);
+        //await GetApiCounterpartiesOrdersPositions(api);
+        //await GetApiOrdersDemand(api);
         await GetApiSalesReturn(api);
-        await GetApiSalesReturnPositions(api);
-        await GetApiPositions(api, assortment, true);
-        await GetApiPositions(api, assortment, false);
+        //await GetApiSalesReturnPositions(api);
+        //await GetApiPositions(api, assortment, true);
+        //await GetApiPositions(api, assortment, false);
 
 
 
-        //var quantyDemand = new ApiParameterBuilder<DemandQuery>();
-        //quantyDemand.Expand().With(p => p.Positions);
-        //var demand = await api.Demand.GetAsync(Guid.Parse("01dc1833-a05a-11ec-0a80-02d6000b1cc1"), quantyDemand);
+        var quantyDemand = new ApiParameterBuilder<DemandQuery>();
+        quantyDemand.Expand().With(p => p.Positions);
+        var demand = await api.Demand.GetAsync(Guid.Parse("01dc1833-a05a-11ec-0a80-02d6000b1cc1"), quantyDemand);
 
-        //var salesReturn = new SalesReturn()
-        //{
-        //    Agent = demand.Payload.Agent,
-        //    Organization = demand.Payload.Organization,
-        //    Store = demand.Payload.Store,
-        //    Demand = demand.Payload,
-        //    Positions = new PagedMetaEntities<SalesReturnPosition>()
-        //    {
+        var salesReturn = new SalesReturn()
+        {
+            Agent = demand.Payload.Agent,
+            Organization = demand.Payload.Organization,
+            Store = demand.Payload.Store,
+            Demand = demand.Payload,
+            Positions = new PagedMetaEntities<SalesReturnPosition>()
+            {
 
-        //        Rows = new[]
-        //        {
-        //            new SalesReturnPosition
-        //            {
-        //                Quantity=demand.Payload.Positions.Rows[0].Quantity,
-        //                Price=demand.Payload.Positions.Rows[0].Price,
-        //                Assortment=demand.Payload.Positions.Rows[0].Assortment
-        //            }
-        //        }
-        //    }
+                Rows = new[]
+                {
+                    new SalesReturnPosition
+                    {
+                        Quantity=demand.Payload.Positions.Rows[0].Quantity,
+                        Price=demand.Payload.Positions.Rows[0].Price,
+                        Assortment=demand.Payload.Positions.Rows[0].Assortment
+                    }
+                }
+            }
 
 
-        //};
-        //var sales=await api.SalesReturn.CreateAsync(salesReturn);
+        };
+        var sales=await api.SalesReturn.CreateAsync(salesReturn);
 
 
 

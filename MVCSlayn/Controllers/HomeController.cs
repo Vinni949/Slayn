@@ -122,6 +122,7 @@ namespace MVCSlayn.Controllers
 
             return RedirectToAction(nameof(Privacy), new { page = currentPage, searchString = searchString });
         }
+        [HttpPost]
 
         public async Task<IActionResult> AddTask(string posId, string id)
         {
@@ -156,8 +157,8 @@ namespace MVCSlayn.Controllers
             await api.Task.CreateAsync(task);
             return RedirectToAction(nameof(Orders));
         }
-            [HttpPost]
-        public async Task<IActionResult> ReturnPositionsOrder(string posId,string id)
+        [HttpPost]
+        public async Task<IActionResult> ReturnPositionsOrder(string posId, string id)
         {
             var credentials = new MoySkladCredentials()
             {
@@ -168,41 +169,48 @@ namespace MVCSlayn.Controllers
             var api = new MoySkladApi(credentials, httpClient);
             var quantyDemand = new ApiParameterBuilder<DemandQuery>();
             quantyDemand.Expand().With(p => p.Positions);
-            var demand = await api.Demand.GetAsync(Guid.Parse(posId), quantyDemand);
-            var interPos = demand.Payload.Positions.Rows[0];
-            foreach(var pos in demand.Payload.Positions.Rows)
+            var demandId = DBSlayn.orderClass.Include(p => p.Demands).SingleOrDefault(p => p.Id == posId);
+            foreach (var dem in demandId.Demands)
             {
-                string[] interPosID = pos.Assortment.Meta.Href.Split("/");
-                if (interPosID[interPosID.Count()-1]==id)
+                var demand = await api.Demand.GetAsync(Guid.Parse(dem.Id), quantyDemand);
+               
+                foreach (var pos in demand.Payload.Positions.Rows)
                 {
-                    interPos = pos;
-                }
-            }
-            SalesReturn salesReturn = new SalesReturn()
-            {
-                Agent = demand.Payload.Agent,
-                Organization = demand.Payload.Organization,
-                Store = demand.Payload.Store,
-                Demand = demand.Payload,
-                Positions = new PagedMetaEntities<SalesReturnPosition>()
-                {
-
-                    Rows = new[]
+                    string[] interPosID = pos.Assortment.Meta.Href.Split("/");
+                    if (interPosID[interPosID.Count() - 1] == id)
                     {
-                        new SalesReturnPosition
+
+                        var salesReturn = new SalesReturn()
                         {
-                            Quantity=1,
-                            Price=interPos.Price,
-                            Assortment=interPos.Assortment
-                        }
+                            Agent = demand.Payload.Agent,
+                            Organization = demand.Payload.Organization,
+                            Store = demand.Payload.Store,
+                            Demand = demand.Payload,
+                            Applicable=false,
+                            Positions = new PagedMetaEntities<SalesReturnPosition>()
+                            {
+
+                                Rows = new[]
+                                {
+                                    new SalesReturnPosition
+                                    {
+                                        Quantity=demand.Payload.Positions.Rows[0].Quantity,
+                                        Price=demand.Payload.Positions.Rows[0].Price,
+                                        Assortment=demand.Payload.Positions.Rows[0].Assortment
+                                    }
+                                }
+                            }
+
+
+                        };
+                        var salesReturnResponse = await api.SalesReturn.CreateAsync(salesReturn);
                     }
                 }
-                
 
-            };
-            var salesReturnResponse=await api.SalesReturn.CreateAsync(salesReturn);
+            }
             return RedirectToAction(nameof(Orders));
         }
+        
 
         public IActionResult Basket(int? page)
         {
