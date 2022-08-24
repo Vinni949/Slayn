@@ -10,23 +10,7 @@ static class Program
 {
     static async Task Main(string[] args)
     {
-        using (var context = new DBSlayn())
-        {
-            foreach (var orders in context.positionClass)
-            {
-                context.positionClass.Remove(orders);
-            }
-            context.SaveChanges();
-        }
-        using (var context = new DBSlayn())
-        {
-            foreach (var orders in context.orderClass)
-            {
-                context.orderClass.Remove(orders);
-            }
-            context.SaveChanges();
-        }
-
+        
         var api = GetApiCredentials();
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<AssortmentClass> assortment = new List<AssortmentClass>();
