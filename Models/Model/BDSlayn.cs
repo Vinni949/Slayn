@@ -30,7 +30,7 @@ namespace Models1.Model
         public DbSet<SalesReturnPositionsClass> salesReturnPositionsClass { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server = (localdb)\mssqllocaldb;Database = BdSlayn; Trusted_Connection = True;");
+            optionsBuilder.UseSqlServer("workstation id=BdSlayn.mssql.somee.com;packet size=4096;user id=Vinni47866522_SQLLogin_1;pwd=1ljcm1fnbm;data source=BdSlayn.mssql.somee.com;persist security info=False;initial catalog=BdSlayn");
         }
 
 
