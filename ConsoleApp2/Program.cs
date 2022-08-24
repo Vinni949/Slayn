@@ -10,7 +10,22 @@ static class Program
 {
     static async Task Main(string[] args)
     {
-
+        using (var context = new DBSlayn())
+        {
+            foreach (var orders in context.positionClass)
+            {
+                context.positionClass.Remove(orders);
+            }
+            context.SaveChanges();
+        }
+        using (var context = new DBSlayn())
+        {
+            foreach (var orders in context.orderClass)
+            {
+                context.orderClass.Remove(orders);
+            }
+            context.SaveChanges();
+        }
 
         var api = GetApiCredentials();
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
@@ -169,8 +184,8 @@ static class Program
     static async Task<List<CounterPartyClass>> GetApiCounterparties(MoySkladApi api, List<CounterPartyClass> counterParties)
     {
         var queryCountr = new ApiParameterBuilder<CounterpartiesQuery>();
-        queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/ffbdbe2e-3254-11ec-0a80-00f8000ad694").Should().NotBe("false"); //Выгрузка по рассылке остатков
-        //queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/c3905508-f2bf-11ec-0a80-06270018eda1").Should().NotBe(null); //Вышрузка по логину и паролю
+        //queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/ffbdbe2e-3254-11ec-0a80-00f8000ad694").Should().NotBe("false"); //Выгрузка по рассылке остатков
+        queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/c3905508-f2bf-11ec-0a80-06270018eda1").Should().NotBe(null); //Вышрузка по логину и паролю
         int offset = 0;
         while (true)
         {
@@ -232,7 +247,7 @@ static class Program
         {
             int offset = 0; 
             var queryOrders = new ApiParameterBuilder<CustomerOrdersQuery>();
-            DateTime date = DateTime.Now.Subtract(new TimeSpan(182, 0, 0, 0));
+            DateTime date = DateTime.Now.Subtract(new TimeSpan(91, 0, 0, 0));
             queryOrders.Parameter("deliveryPlannedMoment").Should().BeGreaterThan(date.ToString("yyyy-MM-dd hh:mm:ss"));
             queryOrders.Parameter("agent").Should().Be(counterParties[conterPartiecCount].Meta);
             //queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");

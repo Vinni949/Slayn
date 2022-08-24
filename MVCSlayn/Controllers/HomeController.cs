@@ -281,6 +281,7 @@ namespace MVCSlayn.Controllers
                 {
                     Quantity = basketPositions[i].Count,
                     Price = (long)basketPositions[i].Price*100,
+                    Vat=18,
                     Assortment = new Product
                     {
                         Meta = new Meta
