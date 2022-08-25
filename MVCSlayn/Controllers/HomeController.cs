@@ -139,7 +139,7 @@ namespace MVCSlayn.Controllers
             var credentials = new MoySkladCredentials()
             {
                 Username = "aldef@slayn",
-                Password = "12345678",
+                Password = "333427804",
             };
             var httpClient = new HttpClient();
             var api = new MoySkladApi(credentials, httpClient);
@@ -167,7 +167,7 @@ namespace MVCSlayn.Controllers
             var credentials = new MoySkladCredentials()
             {
                 Username = "aldef@slayn",
-                Password = "12345678",
+                Password = "333427804",
             };
             var httpClient = new HttpClient();
             var api = new MoySkladApi(credentials, httpClient);
@@ -261,7 +261,7 @@ namespace MVCSlayn.Controllers
             var credentials = new MoySkladCredentials()
             {
                 Username = "aldef@slayn",
-                Password = "12345678",
+                Password = "333427804",
             };
             var httpClient = new HttpClient();
             var api = new MoySkladApi(credentials, httpClient);

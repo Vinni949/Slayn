@@ -10,8 +10,14 @@ static class Program
 {
     static async Task Main(string[] args)
     {
-        
-        var api = GetApiCredentials();
+        List<string> s=new List<string>();
+        StreamReader f = new StreamReader("test.txt");
+        while (!f.EndOfStream)
+        {
+            s.Add(f.ReadLine());
+        }
+        f.Close();
+        var api = GetApiCredentials(s);
         List<CounterPartyClass> counterParties = new List<CounterPartyClass>();
         List<AssortmentClass> assortment = new List<AssortmentClass>();
         counterParties = await GetApiCounterparties(api, counterParties);
@@ -42,12 +48,12 @@ static class Program
     ///<returns>
     ///возвращает api-подключение
     ///</returns>
-    static MoySkladApi GetApiCredentials()
+    static MoySkladApi GetApiCredentials(List<string> s)
     {
         var credentials = new MoySkladCredentials()
         {
-            Username = "aldef@slayn",
-            Password = "12345678",
+            Username = s[0],
+            Password = s[1],
         };
         var httpClient = new HttpClient();
         var api = new MoySkladApi(credentials, httpClient);

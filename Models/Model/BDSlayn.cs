@@ -30,7 +30,13 @@ namespace Models1.Model
         public DbSet<SalesReturnPositionsClass> salesReturnPositionsClass { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("workstation id=DBSlayn.mssql.somee.com;packet size=4096;user id=Vinni47866522_SQLLogin_1;pwd=1ljcm1fnbm;data source=DBSlayn.mssql.somee.com;persist security info=False;initial catalog=DBSlayn");
+            List<string> s = new List<string>();
+            StreamReader f = new StreamReader("test.txt");
+            while (!f.EndOfStream)
+            {
+                s.Add(f.ReadLine());
+            }
+            optionsBuilder.UseSqlServer(s[2]);
         }
 
 
