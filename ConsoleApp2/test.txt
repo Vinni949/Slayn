@@ -1,0 +1,3 @@
+aldef@slayn
+333427804
+workstation id=DBSlayn.mssql.somee.com;packet size=4096;user id=Vinni47866522_SQLLogin_1;pwd=1ljcm1fnbm;data source=DBSlayn.mssql.somee.com;persist security info=False;initial catalog=DBSlayn
