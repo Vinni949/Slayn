@@ -13,16 +13,50 @@
 </button>
 </p>
 <div class="collapse" id="order-@s.Id">
+    <div class="container text-center">
+    <div class="row align-items-start">
+        <div class="col-6">
+            наименование
+        </div>
+        <div class="col-1">
+            количество
+        </div>
+        <div class="col-1">
+            цена
+        </div>
+        <div class="col-3">
+            оформить возврат
+        </div>
+         <div class="col-1"></div>
+        </div>
+    </div>
     @foreach(var pos in s.positions)
         {
+            
         <div class="card card-body">
-                    <form asp-action="ReturnPositionsOrder" method="post">
+                    
+               <div class="container text-center">
+    <div class="row align-items-start">
+        <div class="col-6">
+            @pos.Name
+        </div>
+        <div class="col-1">
+            @pos.OldQuantity
+        </div>
+        <div class="col-1">
+            @(pos.priceOldOrder/100) руб.
+        </div>
+        <div class="col-3">
+          <form asp-action="ReturnPositionsOrder" method="post">
                         <input type="hidden" value="@s.Id" name="posId" />
                         <input type="hidden" value="@pos.Id" name="id" />
                         <input type="submit" value="Возврат" />
                     </form>
-                    
-        @pos.Name @pos.OldQuantity @(pos.priceOldOrder/100) руб.
+        </div>
+        <div class="col-1"></div>
+    </div>
+</div>     
+       
         </div>
         }
 </div>
