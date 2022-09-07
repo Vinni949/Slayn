@@ -251,10 +251,27 @@ namespace MVCSlayn.Controllers
 
         }
         /// <summary>
-        /// Создание заказа
+        /// очистка корзины
         /// </summary>
         /// <returns></returns>
         [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> ClearBasket()
+        {
+            foreach (var positions in DBSlayn.userBaskets)
+            {
+                DBSlayn.userBaskets.Remove(positions);
+
+            }
+            DBSlayn.SaveChanges();
+            return RedirectToAction(nameof(Privacy));
+        }
+
+            /// <summary>
+            /// Создание заказа
+            /// </summary>
+            /// <returns></returns>
+            [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateOrder()
         {
