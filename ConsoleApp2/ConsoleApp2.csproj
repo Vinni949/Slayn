@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Confiti.MoySklad.Remap.Sdk" Version="0.15.2" />
+    <PackageReference Include="Confiti.MoySklad.Remap.Sdk" Version="0.18.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.6">
       <PrivateAssets>all</PrivateAssets>

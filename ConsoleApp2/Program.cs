@@ -4,6 +4,7 @@ using Confiti.MoySklad.Remap.Entities;
 using Confiti.MoySklad.Remap.Models;
 using Microsoft.EntityFrameworkCore;
 using Models1.Model;
+using System.Net;
 using System.Net.Mime;
 
 static class Program
@@ -22,10 +23,10 @@ static class Program
         List<AssortmentClass> assortment = new List<AssortmentClass>();
         counterParties = await GetApiCounterparties(api, counterParties);
         await GetApiCounterpartiesOrders(api, counterParties);
-        await GetApiCounterpartiesOrdersPositions(api);
-        await GetApiOrdersDemand(api);
-        await GetApiSalesReturn(api);
-        await GetApiSalesReturnPositions(api);
+        //await GetApiCounterpartiesOrdersPositions(api);
+        //await GetApiOrdersDemand(api);
+        //await GetApiSalesReturn(api);
+        //await GetApiSalesReturnPositions(api);
         await GetApiPositions(api, assortment, true);
         await GetApiPositions(api, assortment, false);
 
@@ -50,12 +51,16 @@ static class Program
     ///</returns>
     static MoySkladApi GetApiCredentials(List<string> s)
     {
+        var httpClient = new HttpClient(new HttpClientHandler()
+        {
+            // gZip обязателен
+            AutomaticDecompression = DecompressionMethods.GZip
+        });
         var credentials = new MoySkladCredentials()
         {
             Username = s[0],
             Password = s[1],
         };
-        var httpClient = new HttpClient();
         var api = new MoySkladApi(credentials, httpClient);
         return api;
     }
@@ -87,7 +92,7 @@ static class Program
         int offset = 0;
         var query = new AssortmentApiParameterBuilder();
         var sklad = await api.Store.GetAllAsync();
-        query.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/product/metadata/attributes/27fa75f7-3626-11ec-0a80-02a60003df33").Should().Be("true");
+        query.Parameter("https://api.moysklad.ru/api/remap/1.2/entity/product/metadata/attributes/27fa75f7-3626-11ec-0a80-02a60003df33").Should().Be("true");
         query.Expand().With(p => p.Product).And.With(p => p.Product.SalePrices);
         if (allStok == false)
         { 
@@ -124,11 +129,13 @@ static class Program
 
                     for (int a = 0; a < positionAssortment.Payload.SalePrices.Length; a++)
                     {
-                       
+                        if (positionAssortment.Payload.SalePrices[a].Value != 0)
+                        {
                             PriceTypeClass priceTypeClass = new PriceTypeClass();
                             priceTypeClass.name = positionAssortment.Payload.SalePrices[a].PriceType.Name.ToString();
                             priceTypeClass.price = Convert.ToDecimal(positionAssortment.Payload.SalePrices[a].Value / 100);
                             assortment.PriceTypes.Add(priceTypeClass);
+                        }
                         
                     }
                 }
@@ -174,8 +181,7 @@ static class Program
     static async Task<List<CounterPartyClass>> GetApiCounterparties(MoySkladApi api, List<CounterPartyClass> counterParties)
     {
         var queryCountr = new ApiParameterBuilder<CounterpartiesQuery>();
-        //queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/ffbdbe2e-3254-11ec-0a80-00f8000ad694").Should().NotBe("false"); //Выгрузка по рассылке остатков
-        queryCountr.Parameter("https://online.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/c3905508-f2bf-11ec-0a80-06270018eda1").Should().NotBe(null); //Вышрузка по логину и паролю
+        queryCountr.Parameter("https://api.moysklad.ru/api/remap/1.2/entity/counterparty/metadata/attributes/c3905508-f2bf-11ec-0a80-06270018eda1").Should().NotBe(null); //Вышрузка по логину и паролю
         int offset = 0;
         while (true)
         {
@@ -240,7 +246,7 @@ static class Program
             DateTime date = DateTime.Now.Subtract(new TimeSpan(91, 0, 0, 0));
             queryOrders.Parameter("deliveryPlannedMoment").Should().BeGreaterThan(date.ToString("yyyy-MM-dd hh:mm:ss"));
             queryOrders.Parameter("agent").Should().Be(counterParties[conterPartiecCount].Meta);
-            //queryOrders.Parameter("state").Should().Be("https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
+            //queryOrders.Parameter("state").Should().Be("https://api.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a");
             while (true)
             {
                 queryOrders.Offset(offset);
@@ -395,7 +401,7 @@ static class Program
                     
                     for (var j = 0; j < demands.Payload.Demands.Count(); j++)
                     {
-                        if (demands.Payload.Demands[j].Meta.MetadataHref == "https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata")
+                        if (demands.Payload.Demands[j].Meta.MetadataHref == "https://api.moysklad.ru/api/remap/1.2/entity/demand/metadata")
                         {
                             string[] demandId = demands.Payload.Demands[j].Meta.Href.Split('/');
                             demand.Id = demandId[demandId.Count() - 1];
@@ -563,35 +569,35 @@ static class Program
     static string GetState(string href)
     {
         string state="";
-        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a")
+        if (href == "https://api.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84956-db44-11e8-9ff4-34e80016406a")
         {
             state = "Выполнен";
         }
-        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84c2b-db44-11e8-9ff4-34e80016406b")
+        if (href == "https://api.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84c2b-db44-11e8-9ff4-34e80016406b")
         {
             state = "Возврат поставщику";
         }
-        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f840a2-db44-11e8-9ff4-34e800164066")
+        if (href == "https://api.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f840a2-db44-11e8-9ff4-34e800164066")
         {
             state = "Самовывоз";
         }
-        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84e1f-db44-11e8-9ff4-34e80016406c")
+        if (href == "https://api.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f84e1f-db44-11e8-9ff4-34e80016406c")
         {
             state = "Отмена";
         }
-        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/693013d8-4938-11e9-9ff4-34e8000cb7f9")
+        if (href == "https://api.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/693013d8-4938-11e9-9ff4-34e8000cb7f9")
         {
             state = "дубль";
         }
-        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/174d0743-5ed0-11ea-0a80-000f00150769")
+        if (href == "https://api.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/174d0743-5ed0-11ea-0a80-000f00150769")
         {
             state = "Отмена заявки";
         }
-        if (href == "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/dfb3d04c-1479-11eb-0a80-04dd000f981d")
+        if (href == "https://api.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/dfb3d04c-1479-11eb-0a80-04dd000f981d")
         {
             state = "Выполнен НА";
         }
-        if(href== "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f85266-db44-11e8-9ff4-34e80016406e")
+        if(href== "https://api.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/f2f85266-db44-11e8-9ff4-34e80016406e")
         {
             state = "Рекламация";
         }

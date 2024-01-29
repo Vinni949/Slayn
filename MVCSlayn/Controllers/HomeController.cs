@@ -95,9 +95,11 @@ namespace MVCSlayn.Controllers
                     assortments[a].price = price.price;
                     DBSlayn.SaveChanges();
                 }
-                else
+                else if (assortments[a].PriceTypes.Count > 0)
+                {
                     assortments[a].price = assortments[a].PriceTypes[0].price;
-                DBSlayn.SaveChanges();
+                    DBSlayn.SaveChanges();
+                }
             }
             ViewBag.Search = searchString;
             return View(new PagedList<AssortmentClass>(page.Value, assortmetCount, assortments, pageSize));

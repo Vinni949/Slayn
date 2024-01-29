@@ -1,0 +1,3 @@
+api@slayn
+333427804
+Server=ms-sql-10.in-solve.ru;Database=1gb_lkslayn22;uid=1gb_slayndev;pwd=86443ad5dgh;Encrypt=False;TrustServerCertificate=False;
