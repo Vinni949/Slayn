@@ -1,0 +1,36 @@
+﻿
+
+<form method="post" collor="#FFFFFF" >
+<form asp-action="Task" method="post">
+   
+    <p>
+        <label>Номер отгрузки:</label><br />
+        <input type="text" name="OrderName" />
+    </p>
+    <p>
+        <label>Артикул товара:</label><br />
+        <input type="text" name="PositionName" />
+    </p>
+    <p>
+        <label>Суть рекламации:</label><br />
+        <input type="text" class="text" name="Massage" />
+    </p>
+    <p>
+        <label>Почта для связи:</label><br />
+        <input type="text" name="Post" />
+    </p>
+    <p>
+        <input type="submit" value="Отправить" />
+    </p>
+</form>
+</form>
+<style>
+input.text {
+    width:  1200px;
+    height: 115px;
+    padding: 5px 10px 5px 10px;
+    border:1px solid #999;
+    font-size:16px;
+    font-family: Tahoma;
+}
+</style>

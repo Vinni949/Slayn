@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleApp2.Model
+namespace Models1.Model
 {
-    internal class CounterPartyClass
+    public class DemandClass
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public string PriceType { get; set; }
-        public List<OrderClass> orders { get; set; }
-
+        public string? Status { get; set; }
+        public long? sum { get; set; }
+        public List<SalesReturnClass>? SalesReturn { get;set; }
     }
 }

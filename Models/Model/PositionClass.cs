@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleApp2.Model
+namespace Models1.Model
 {
-    internal class PositionClass
+    public class PositionClass
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public string PriceType { get; set; }
-        public int Price { get; set; }
+        public long? priceOldOrder { get; set; }
+        public double OldQuantity { get; set; }
+        
     }
 }
